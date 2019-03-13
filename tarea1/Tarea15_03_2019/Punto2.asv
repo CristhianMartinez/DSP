@@ -119,14 +119,12 @@ switch Persona
         datosActuales = cellstr(get(handles.signal1Mnu, 'String'));
         datosActuales{end+1} = nuevaPalabra;
         set(handles.signal1Mnu,'string',datosActuales);
-        set(handles.signal1Mnu, 'Value', length(datosActuales))
     case 2
         diccionarioReducidoP2(nuevaPalabra) = y1;
         
         datosActuales = cellstr(get(handles.signal2Mnu, 'String'));
         datosActuales{end+1} = nuevaPalabra;
         set(handles.signal2Mnu,'string',datosActuales);
-        set(handles.signal2Mnu, 'Value', length(datosActuales))
 end
 
 
@@ -180,24 +178,16 @@ function correlacionBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to correlacionBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+global Fs1
 global diccionarioReducidoP1
-global diccionarioReducidoP2
 
 idx1 = get(handles.signal1Mnu,'Value');
 items1 = get(handles.signal1Mnu,'String')
 palabra1 = items1{idx1}
 
-% if palabra1 == ''
-%     return
-% end
-
 idx2 = get(handles.signal2Mnu,'Value');
 items2 = get(handles.signal2Mnu,'String')
 palabra2 = items2{idx2}
-
-% if palabra2 == ''
-%     return
-% end
 
 % Señales a correlacionar
 x=diccionarioReducidoP1(palabra1); 
@@ -216,8 +206,7 @@ ro=r/sqrt(Ex*Ey); %Normalizar la correlación
 % Graficación
 
 [rmax,lmax]=max(ro);
-axes(handles.axes3) 
-stem(l,ro);title(['ro(l), lmax= ' num2str(lmax-N)]); 
+subplot(2,2,3:4); stem(l,ro);title(['ro(l), lmax= ' num2str(lmax-N)]); 
 xlabel('l');grid on;
 
 % --- Executes on button press in reproducirBtn1.
@@ -231,10 +220,6 @@ global diccionarioReducidoP1
 idx = get(handles.signal1Mnu,'Value');
 items = get(handles.signal1Mnu,'String')
 palabra = items{idx}
-
-% if palabra == ''
-%     return
-% end
 
 sound(diccionarioReducidoP1(palabra),Fs1);
 
@@ -251,10 +236,6 @@ idx = get(handles.signal2Mnu,'Value');
 items = get(handles.signal2Mnu,'String')
 palabra = items{idx}
 
-% if palabra == ''
-%     return
-% end
-
 sound(diccionarioReducidoP2(palabra),Fs1);
 
 
@@ -269,11 +250,7 @@ function signal1Mnu_Callback(hObject, eventdata, handles)
 global diccionarioReducidoP1
 contents = cellstr(get(hObject,'String'))
 axes(handles.axes1)  
-palabra = contents{get(hObject,'Value')};
-% if palabra == ''
-%     return
-% end
-plot(diccionarioReducidoP1(palabra))
+plot(diccionarioReducidoP1(contents{get(hObject,'Value')}))
 
 
 % --- Executes during object creation, after setting all properties.
@@ -300,11 +277,7 @@ function signal2Mnu_Callback(hObject, eventdata, handles)
 global diccionarioReducidoP2
 contents = cellstr(get(hObject,'String'))
 axes(handles.axes2)  
-palabra = contents{get(hObject,'Value')};
-% if palabra == ''
-%     return
-% end
-plot(diccionarioReducidoP2(palabra))
+plot(diccionarioReducidoP2(contents{get(hObject,'Value')}))
 
 % --- Executes during object creation, after setting all properties.
 function signal2Mnu_CreateFcn(hObject, eventdata, handles)
