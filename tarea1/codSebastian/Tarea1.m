@@ -22,7 +22,7 @@ function varargout = Tarea1(varargin)
 
 % Edit the above text to modify the response to help Tarea1
 
-% Last Modified by GUIDE v2.5 10-Mar-2019 10:28:28
+% Last Modified by GUIDE v2.5 13-Mar-2019 01:28:49
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -644,25 +644,401 @@ for i = 1 : iteration/trama
     pause(0.05)
 end  
 
+% --- Executes on button press in ReproducirSenalP.
+function ReproducirSenalP_Callback(hObject, eventdata, handles)
+% hObject    handle to ReproducirSenalP (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% hObject    handle to ReproducirSenal3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global Sf
+global Fs
 
+inv = get(handles.InvertirSenalP, 'Value');
+mono = get(handles.EstereoSenalP, 'Value');
 
+if mono == 0
+    if inv == 0
+        recObjPO = audioplayer(Sf*get(handles.VolumenSenalP,'Value'),Fs,8);
+        playblocking(recObjPO)
+    else
+        recObjPO = audioplayer(fliplr(Sf)*get(handles.VolumenSenalP,'Value'),Fs,8);
+        playblocking(recObjPO)
+    end
+else
+    %Pasar a mono y normalizar suma
+    [l,~] = size(Sf);
+    if l > 1
+        yp_raw = Sf(1,:)+Sf(2,:);
+        maxyp = max(yp_raw);
+        minyp = min(yp_raw);
+        if maxyp > minyp
+            yp_m = yp_raw./maxyp;
+        else 
+            yp_m = yp_raw./minyp;
+        end
+    end
+        
+    if inv == 0
+        recObjPO = audioplayer(yp_m*get(handles.VolumenSenalP,'Value'),Fs,8);
+        playblocking(recObjPO)
+    else
+        recObjPO = audioplayer(fliplr(yp_m)*get(handles.VolumenSenalP,'Value'),Fs,8);
+        playblocking(recObjPO)
+    end
+end
 
+% --- Executes on button press in EDRealizar.
+function EDRealizar_Callback(hObject, eventdata, handles)
+% hObject    handle to EDRealizar (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global Sf
+global Fs
 
+EDSignal = get(handles.EDSenal,'Value');
+EDChannel = get(handles.EDCanal,'Value');
 
+switch EDSignal
+    case 1
+        global y1
+        global Fs1
+        In = y1;
+        Fs = Fs1;
+    case 2
+        global y2
+        global Fs2
+        In = y2;
+        Fs = Fs2;
+    case 3
+        global y3
+        global Fs3
+        In = y3;
+        Fs = Fs3;
+end
 
+A1 = str2num(get(handles.CA, 'string'));
+B = str2num(get(handles.CB, 'string'));
+Ci = str2num(get(handles.CCi, 'string'));
+N = length(A1) - 1;
+M = length(B) - 1;
 
+switch EDChannel
+    case 1
+        X = horzcat(zeros(1,M),In(1,:));
+        Y1 = horzcat(fliplr(Ci(1:N)), zeros(1,length(X) - M));
+        A = A1./A1(1);
+        A = A(2:end);
+        B = B./A1(1);
+        j = M + 1;
+        for i = N + 1:length(Y1)
+            aux = fliplr(Y1(i - N:i-1));
+            aux2 = fliplr(X(1,j - M:j));
+            Y1(i) = -sum(aux.*A) + sum(aux2.*B);
+            j = j + 1;
+        end
+        
+        [Y1_n,~] = mapminmax(Y1);
+        Yt = vertcat(Y1_n(N+1:end), In(2,:));
+       
+    case 2
+        X = horzcat(zeros(1,M),In(2,:));
+        Y2 = horzcat(fliplr(Ci(1:N)), zeros(1,length(X) - M));
+        A = A1./A1(1);
+        A = A(2:end);
+        B = B./A1(1);
+        j = M + 1;
+        for i = N + 1:length(Y2)
+            aux = fliplr(Y2(i - N:i-1));
+            aux2 = fliplr(X(1,j - M:j));
+            Y2(i) = -sum(aux.*A) + sum(aux2.*B);
+            j = j + 1;
+        end        
+        
+        [Y2_n,~] = mapminmax(Y2);
+        Yt = vertcat(In(1,:), Y2_n(N+1:end));
+        
+    case 3
+        X = horzcat(zeros(1,M),In(1,:));
+        Y1 = horzcat(fliplr(Ci(1:N)), zeros(1,length(X) - M));
+        A = A1./A1(1);
+        A = A(2:end);
+        B = B./A1(1);
+        j = M + 1;
+        for i = N + 1:length(Y1)
+            aux = fliplr(Y1(i - N:i-1));
+            aux2 = fliplr(X(1,j - M:j));
+            Y1(i) = -sum(aux.*A) + sum(aux2.*B);
+            j = j + 1;
+        end
 
+        X = horzcat(zeros(1,M),In(2,:));
+        Y2 = horzcat(fliplr(Ci(1:N)), zeros(1,length(X) - M));
+        A = A1./A1(1);
+        A = A(2:end);
+        B = B./A1(1);
+        j = M + 1;
+        for i = N + 1:length(Y2)
+            aux = fliplr(Y2(i - N:i-1));
+            aux2 = fliplr(X(1,j - M:j));
+            Y2(i) = -sum(aux.*A) + sum(aux2.*B);
+            j = j + 1;
+        end
+        
+        [Y1_n,~] = mapminmax(Y1);
+        [Y2_n,~] = mapminmax(Y2);
+        
+        Yt = vertcat(Y1_n(N+1:end), Y2_n(N+1:end));
+end
 
+%Graficar audio de entrada
+RecordTime = length(Yt(1,:))/Fs;
+iteration = Fs*RecordTime;
+trama = Fs/16;
+Sf = Yt;
 
+%Graficar
+axes(handles.senal4);
+for i = 1 : iteration/trama
+    plot(Sf(1,1:i*trama),'Color','c','LineWidth',2);
+    hold on
+    plot(Sf(2,1:i*trama),'Color','m','LineWidth',2);
+    hold off
+    axis([0 iteration -1 1]);
+    xlabel('Sample number');
+    ylabel('Amplitude');
+    grid on;
+    pause(0.05)
+end 
 
+% --- Executes on button press in SumaRealizar.
+function SumaRealizar_Callback(hObject, eventdata, handles)
+% hObject    handle to SumaRealizar (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global Sf
+global Fs
 
+Signal1 = get(handles.SumaSenal1,'Value');
+Signal2 = get(handles.SumaSenal2,'Value');
+Signal1Channel = get(handles.EDCanal,'Value');
+Signal2Channel = get(handles.EDCanal,'Value');
 
+global y1
+global Fs1
+global y2
+global Fs2
+global y3
+global Fs3
+        
+switch Signal1
+    case 1        
+        Y1 = y1;
+        FsY1 = Fs1;
+    case 2        
+        Y1 = y2;
+        FsY1 = Fs2;
+    case 3       
+        Y1 = y3;
+        FsY1 = Fs3;
+end
 
+switch Signal2
+    case 1
+        Y2 = y1;
+        FsY2 = Fs1;
+    case 2
+        Y2 = y2;
+        FsY2 = Fs2;
+    case 3
+        Y2 = y3;
+        FsY2 = Fs3;
+end
 
+switch Signal1Channel
+    case 1
+        Y1 = vertcat(Y1(1,:),zeros(1,length(Y1(1,:))));
+    case 2
+        Y1 = vertcat(zeros(1,length(Y1(1,:))), Y1(2,:));
+end   
 
+switch Signal2Channel
+    case 1
+        Y2 = vertcat(Y2(1,:),zeros(1,length(Y2(1,:))));
+    case 2
+        Y2 = vertcat(zeros(1,length(Y2(1,:))), Y2(2,:));
+end  
 
+%Igualar frecuencias
+if FsY1 > FsY2
+    Y2_s1 = interp(Y2(1,:),FsY1);
+    Y2_s2 = interp(Y2(2,:),FsY1);
+    Y1_s1 = decimate(Y1(1,:),FsY2);
+    Y1_s2 = decimate(Y1(2,:),FsY2);
+    Fs = FsY1 * FsY2;
+elseif FsY1 < FsY2
+    Y1_s1 = interp(Y1(1,:),FsY2);
+    Y1_s2 = interp(Y1(2,:),FsY2);
+    Y2_s1 = decimate(Y2(1,:),FsY1);
+    Y2_s2 = decimate(Y2(2,:),FsY1);
+    Fs = FsY1 * FsY2;
+else
+    Y1_s1 = Y1(1,:);
+    Y1_s2 = Y1(2,:);
+    Y2_s1 = Y2(1,:);
+    Y2_s2 = Y2(2,:);
+    Fs = FsY1;
+end
 
+Y1_s = vertcat(Y1_s1, Y1_s2);
+Y2_s = vertcat(Y2_s1, Y2_s2);
 
+%Igualar tiempos
+if length(Y1_s(1,:)) > length(Y2_s(1,:))
+   Y2_IGU = horzcat(zeros(2, length(Y1_s(1,:)) - length(Y2_s(1,:))), Y2_s);
+   Yt = Y1_s + Y2_IGU;
+elseif length(Y1_s(1,:)) < length(Y2_s(1,:))
+   Y1_IGU = horzcat(zeros(2, length(Y2_s(1,:)) - length(Y1_s(1,:))), Y1_s);
+   Yt = Y2_s + Y1_IGU;
+else
+   Yt = Y2_s + Y1_s;
+end
+
+[Sf,~] = mapminmax(Yt);
+
+%Graficar audio de entrada
+RecordTime = length(Yt(1,:))/Fs;
+iteration = Fs*RecordTime;
+trama = Fs/16;
+
+%Graficar
+axes(handles.senal4);
+for i = 1 : iteration/trama
+    plot(Sf(1,1:i*trama),'Color','c','LineWidth',2);
+    hold on
+    plot(Sf(2,1:i*trama),'Color','m','LineWidth',2);
+    hold off
+    axis([0 iteration -1 1]);
+    xlabel('Sample number');
+    ylabel('Amplitude');
+    grid on;
+    pause(0.05)
+end 
+
+% --- Executes on button press in MultiplicarRealizar.
+function MultiplicarRealizar_Callback(hObject, eventdata, handles)
+% hObject    handle to MultiplicarRealizar (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global Sf
+global Fs
+
+Signal1 = get(handles.MultiplicarSenal1,'Value');
+Signal2 = get(handles.MultiplicarSenal2,'Value');
+Signal1Channel = get(handles.MultiplicarCanalSenal1,'Value');
+Signal2Channel = get(handles.MultiplicarCanalSenal2,'Value');
+
+global y1
+global Fs1
+global y2
+global Fs2
+global y3
+global Fs3
+        
+switch Signal1
+    case 1        
+        Y1 = y1;
+        FsY1 = Fs1;
+    case 2        
+        Y1 = y2;
+        FsY1 = Fs2;
+    case 3       
+        Y1 = y3;
+        FsY1 = Fs3;
+end
+
+switch Signal2
+    case 1
+        Y2 = y1;
+        FsY2 = Fs1;
+    case 2
+        Y2 = y2;
+        FsY2 = Fs2;
+    case 3
+        Y2 = y3;
+        FsY2 = Fs3;
+end
+
+switch Signal1Channel
+    case 1
+        Y1 = vertcat(Y1(1,:),zeros(1,length(Y1(1,:))));
+    case 2
+        Y1 = vertcat(zeros(1,length(Y1(1,:))), Y1(2,:));
+end   
+
+switch Signal2Channel
+    case 1
+        Y2 = vertcat(Y2(1,:),zeros(1,length(Y2(1,:))));
+    case 2
+        Y2 = vertcat(zeros(1,length(Y2(1,:))), Y2(2,:));
+end  
+
+%Igualar frecuencias
+if FsY1 > FsY2
+    Y2_s1 = interp(Y2(1,:),FsY1);
+    Y2_s2 = interp(Y2(2,:),FsY1);
+    Y1_s1 = decimate(Y1(1,:),FsY2);
+    Y1_s2 = decimate(Y1(2,:),FsY2);
+    Fs = FsY1 * FsY2;
+elseif FsY1 < FsY2
+    Y1_s1 = interp(Y1(1,:),FsY2);
+    Y1_s2 = interp(Y1(2,:),FsY2);
+    Y2_s1 = decimate(Y2(1,:),FsY1);
+    Y2_s2 = decimate(Y2(2,:),FsY1);
+    Fs = FsY1 * FsY2;
+else
+    Y1_s1 = Y1(1,:);
+    Y1_s2 = Y1(2,:);
+    Y2_s1 = Y2(1,:);
+    Y2_s2 = Y2(2,:);
+    Fs = FsY1;
+end
+
+Y1_s = vertcat(Y1_s1, Y1_s2);
+Y2_s = vertcat(Y2_s1, Y2_s2);
+
+%Igualar tiempos
+if length(Y1_s(1,:)) > length(Y2_s(1,:))
+   Y2_IGU = horzcat(zeros(2, length(Y1_s(1,:)) - length(Y2_s(1,:))), Y2_s);
+   Yt = Y1_s .* Y2_IGU;
+elseif length(Y1_s(1,:)) < length(Y2_s(1,:))
+   Y1_IGU = horzcat(zeros(2, length(Y2_s(1,:)) - length(Y1_s(1,:))), Y1_s);
+   Yt = Y2_s .* Y1_IGU;
+else
+   Yt = Y2_s .* Y1_s;
+end
+
+[Sf,~] = mapminmax(Yt);
+
+%Graficar audio de entrada
+RecordTime = length(Yt(1,:))/Fs;
+iteration = Fs*RecordTime;
+trama = Fs/16;
+
+%Graficar
+axes(handles.senal4);
+for i = 1 : iteration/trama
+    plot(Sf(1,1:i*trama),'Color','c','LineWidth',2);
+    hold on
+    plot(Sf(2,1:i*trama),'Color','m','LineWidth',2);
+    hold off
+    axis([0 iteration -1 1]);
+    xlabel('Sample number');
+    ylabel('Amplitude');
+    grid on;
+    pause(0.05)
+end 
 
 function radiobutton3_Callback(hObject, eventdata, handles)
 % hObject    handle to radiobutton3 (see GCBO)
@@ -1697,11 +2073,7 @@ function pushbutton53_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 
-% --- Executes on button press in ReproducirSenalP.
-function ReproducirSenalP_Callback(hObject, eventdata, handles)
-% hObject    handle to ReproducirSenalP (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+
 
 
 % --- Executes on button press in pushbutton51.
@@ -1810,11 +2182,7 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% --- Executes on button press in EDRealizar.
-function EDRealizar_Callback(hObject, eventdata, handles)
-% hObject    handle to EDRealizar (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+
 
 
 % --- Executes on selection change in SumaSenal1.
@@ -1863,11 +2231,7 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% --- Executes on button press in SumaRealizar.
-function SumaRealizar_Callback(hObject, eventdata, handles)
-% hObject    handle to SumaRealizar (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+
 
 
 % --- Executes on selection change in EDCanal.
@@ -1893,19 +2257,19 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% --- Executes on selection change in SumaCanales.
-function SumaCanales_Callback(hObject, eventdata, handles)
-% hObject    handle to SumaCanales (see GCBO)
+% --- Executes on selection change in SumaCanalSenal1.
+function SumaCanalSenal1_Callback(hObject, eventdata, handles)
+% hObject    handle to SumaCanalSenal1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: contents = cellstr(get(hObject,'String')) returns SumaCanales contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from SumaCanales
+% Hints: contents = cellstr(get(hObject,'String')) returns SumaCanalSenal1 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from SumaCanalSenal1
 
 
 % --- Executes during object creation, after setting all properties.
-function SumaCanales_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to SumaCanales (see GCBO)
+function SumaCanalSenal1_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to SumaCanalSenal1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -1962,11 +2326,7 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% --- Executes on button press in MultiplicarRealizar.
-function MultiplicarRealizar_Callback(hObject, eventdata, handles)
-% hObject    handle to MultiplicarRealizar (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+
 
 
 % --- Executes on selection change in PalabraCorrelacion.
@@ -2223,3 +2583,141 @@ function RealizarCorrelacion_Callback(hObject, eventdata, handles)
 % hObject    handle to RealizarCorrelacion (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+
+function CA_Callback(hObject, eventdata, handles)
+% hObject    handle to CA (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of CA as text
+%        str2double(get(hObject,'String')) returns contents of CA as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function CA_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to CA (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function CB_Callback(hObject, eventdata, handles)
+% hObject    handle to CB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of CB as text
+%        str2double(get(hObject,'String')) returns contents of CB as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function CB_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to CB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function CCi_Callback(hObject, eventdata, handles)
+% hObject    handle to CCi (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of CCi as text
+%        str2double(get(hObject,'String')) returns contents of CCi as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function CCi_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to CCi (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in SumaCanalSenal2.
+function SumaCanalSenal2_Callback(hObject, eventdata, handles)
+% hObject    handle to SumaCanalSenal2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns SumaCanalSenal2 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from SumaCanalSenal2
+
+
+% --- Executes during object creation, after setting all properties.
+function SumaCanalSenal2_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to SumaCanalSenal2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in MultiplicarCanalSenal1.
+function MultiplicarCanalSenal1_Callback(hObject, eventdata, handles)
+% hObject    handle to MultiplicarCanalSenal1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns MultiplicarCanalSenal1 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from MultiplicarCanalSenal1
+
+
+% --- Executes during object creation, after setting all properties.
+function MultiplicarCanalSenal1_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to MultiplicarCanalSenal1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in MultiplicarCanalSenal2.
+function MultiplicarCanalSenal2_Callback(hObject, eventdata, handles)
+% hObject    handle to MultiplicarCanalSenal2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns MultiplicarCanalSenal2 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from MultiplicarCanalSenal2
+
+
+% --- Executes during object creation, after setting all properties.
+function MultiplicarCanalSenal2_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to MultiplicarCanalSenal2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
