@@ -22,7 +22,7 @@ function varargout = Punto2(varargin)
 
 % Edit the above text to modify the response to help Punto2
 
-% Last Modified by GUIDE v2.5 16-Mar-2019 12:19:55
+% Last Modified by GUIDE v2.5 16-Mar-2019 10:14:44
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -113,37 +113,40 @@ set(handles.pararBtn,'enable','off');
 stop(recorder1);
 y1 = getaudiodata(recorder1)';
 
-nuevaPalabra = lower(get(handles.palabraTxt,'String'));
+nuevaPalabra = get(handles.palabraTxt,'String');
 
 Persona = get(handles.personasMnu,'Value');
 
 switch Persona
     case 1
         diccionarioReducidoP1(nuevaPalabra) = y1;
-        set(handles.signal1Mnu,'String',keys(diccionarioReducidoP1));
-        set(handles.signal1Mnu,'Value',1);
-                 
-        items = get(handles.signal1Mnu,'String');
-        palabra = items{1};
+           
+        keys(diccionarioReducidoP1)
+            
+        datosActuales = cellstr(get(handles.signal1Mnu, 'String'));
+        datosActuales{end+1} = nuevaPalabra;
+        set(handles.signal1Mnu,'string',datosActuales);
+        set(handles.signal1Mnu, 'Value', length(datosActuales))
         
+        items = get(handles.signal1Mnu,'String')
+        palabra = items{length(datosActuales)}
         axes(handles.axes1)  
-        t=0:1/Fs:(length(diccionarioReducidoP1(palabra))-1)/Fs;
-        plot(t,diccionarioReducidoP1(palabra));
-        xlabel('s');grid on;
+        %t=0:1/Fs:(length(diccionarioReducidoP1(palabra))-1)/Fs;
+        plot(diccionarioReducidoP1(palabra));
    
     case 2
         diccionarioReducidoP2(nuevaPalabra) = y1;
         
-        set(handles.signal2Mnu,'String',keys(diccionarioReducidoP2));
-        set(handles.signal2Mnu,'Value',1);
+        datosActuales = cellstr(get(handles.signal2Mnu, 'String'));
+        datosActuales{end+1} = nuevaPalabra;
+        set(handles.signal2Mnu,'string',datosActuales);
+        set(handles.signal2Mnu, 'Value', length(datosActuales))
         
-        items = get(handles.signal2Mnu,'String');
-        palabra = items{1};
-        
+        items = get(handles.signal2Mnu,'String')
+        palabra = items{length(datosActuales)}
         axes(handles.axes2)  
-        t=0:1/Fs:(length(diccionarioReducidoP2(palabra))-1)/Fs;
-        plot(t,diccionarioReducidoP2(palabra));
-        xlabel('s');grid on;
+        %t=0:1/Fs:(length(diccionarioReducidoP2(palabra))-1)/Fs;
+        plot(diccionarioReducidoP2(palabra));
 end
 
 
@@ -201,16 +204,16 @@ global diccionarioReducidoP1
 global diccionarioReducidoP2
 
 idx1 = get(handles.signal1Mnu,'Value');
-items1 = get(handles.signal1Mnu,'String');
-palabra1 = items1{idx1};
+items1 = get(handles.signal1Mnu,'String')
+palabra1 = items1{idx1}
 
 if isempty(palabra1)
     return
 end
 
 idx2 = get(handles.signal2Mnu,'Value');
-items2 = get(handles.signal2Mnu,'String');
-palabra2 = items2{idx2};
+items2 = get(handles.signal2Mnu,'String')
+palabra2 = items2{idx2}
 
 if isempty(palabra1)
     return
@@ -235,9 +238,12 @@ ro=r/sqrt(Ex*Ey); %Normalizar la correlación
 
 [rmax,lmax]=max(ro);
 axes(handles.axes3) 
-stem(l,ro);title(['ro(l), lmax= ' num2str(lmax-N) ', rmax= ' sprintf('%.3f',rmax)]); 
+stem(l,ro);title(['ro(l), lmax= ' num2str(lmax-N)]); 
 xlabel('l');grid on;
 
+rmax
+
+set(handles.amplitudLbl,'String',sprintf('%s = %.3f','rmax',rmax));
 
 % --- Executes on button press in reproducirBtn1.
 function reproducirBtn1_Callback(hObject, eventdata, handles)
@@ -248,8 +254,8 @@ global Fs
 global diccionarioReducidoP1
 
 idx = get(handles.signal1Mnu,'Value');
-items = get(handles.signal1Mnu,'String');
-palabra = items{idx};
+items = get(handles.signal1Mnu,'String')
+palabra = items{idx}
 
 if isempty(palabra)
     return
@@ -267,8 +273,8 @@ global Fs
 global diccionarioReducidoP2
 
 idx = get(handles.signal2Mnu,'Value');
-items = get(handles.signal2Mnu,'String');
-palabra = items{idx};
+items = get(handles.signal2Mnu,'String')
+palabra = items{idx}
 
 if isempty(palabra)
     return
@@ -289,15 +295,14 @@ function signal1Mnu_Callback(hObject, eventdata, handles)
 global diccionarioReducidoP1
 global Fs
 
-contents = cellstr(get(hObject,'String'));
+contents = cellstr(get(hObject,'String'))
 axes(handles.axes1)  
 palabra = contents{get(hObject,'Value')};
 if isempty(palabra)
     return
 end
-t=0:1/Fs:(length(diccionarioReducidoP1(palabra))-1)/Fs;
-plot(t, diccionarioReducidoP1(palabra));
-xlabel('s');grid on;
+%t=0:1/Fs:(length(diccionarioReducidoP1(palabra))-1)/Fs;
+plot(diccionarioReducidoP1(palabra));
 
 
 % --- Executes during object creation, after setting all properties.
@@ -324,15 +329,14 @@ function signal2Mnu_Callback(hObject, eventdata, handles)
 global diccionarioReducidoP2
 global Fs
 
-contents = cellstr(get(hObject,'String'));
+contents = cellstr(get(hObject,'String'))
 axes(handles.axes2)  
 palabra = contents{get(hObject,'Value')};
 if isempty(palabra)
     return
 end
-t=0:1/Fs:(length(diccionarioReducidoP2(palabra))-1)/Fs;
-plot(t, diccionarioReducidoP2(palabra));
-xlabel('s');grid on;
+%t=0:1/Fs:(length(diccionarioReducidoP2(palabra))-1)/Fs;
+plot(diccionarioReducidoP2(palabra));
 
 % --- Executes during object creation, after setting all properties.
 function signal2Mnu_CreateFcn(hObject, eventdata, handles)
@@ -356,8 +360,16 @@ global diccionarioReducidoP1
 global diccionarioReducidoP2
 
 idx1 = get(handles.signal1Mnu,'Value');
-items1 = get(handles.signal1Mnu,'String');
-palabra1 = items1{idx1};
+items1 = get(handles.signal1Mnu,'String')
+palabra1 = items1{idx1}
+
+if isempty(palabra1)
+    return
+end
+
+idx2 = get(handles.signal2Mnu,'Value');
+items2 = get(handles.signal2Mnu,'String')
+palabra2 = items2{idx2}
 
 if isempty(palabra1)
     return
@@ -382,7 +394,7 @@ ro=r/sqrt(Ex*Ey); %Normalizar la correlación
 
 [rmax,lmax]=max(ro);
 axes(handles.axes5) 
-stem(l,ro);title(['ro(l), lmax= ' num2str(lmax-N) ', rmax= ' sprintf('%.3f',rmax)]); 
+stem(l,ro);title(['ro(l), lmax= ' num2str(lmax-N)]); 
 xlabel('l');grid on;
 
 
@@ -395,8 +407,8 @@ global diccionarioReducidoP1
 global diccionarioReducidoP2
 
 idx = get(handles.signal2Mnu,'Value');
-items = get(handles.signal2Mnu,'String');
-palabra = items{idx};
+items = get(handles.signal2Mnu,'String')
+palabra = items{idx}
 
 if isempty(palabra)
     return
@@ -407,18 +419,20 @@ x=diccionarioReducidoP2(palabra);
 nx=0:length(x)-1;
 Ex=sum(x.^2); %Energía de x(n)=rxx(0)
 
-ks = keys(diccionarioReducidoP1);
-val = values(diccionarioReducidoP1);
-palabrasrmax = zeros(1,length(diccionarioReducidoP1));
+ks = keys(diccionarioReducidoP1) ;
+val = values(D);
+palabrasT1 = cellstr(get(handles.signal1Mnu, 'String'))
+palabrasrmax = zeros(1,length(palabrasT1));
 
-for i = 1:length(diccionarioReducidoP1)
- y = val{i};
- ny=0:length(y)-1;
+for i = 1:length(D)
+ %[ks{i} val{i}]
+ 
+ ny=0:length(val{i})-1;
  Ey=sum(y.^2); %Energía de y(n)=ryy(0)
  
  % Calcular Correlación
  N=max(length(x),length(y));
- r = xcorr(x, y);
+ r = xcorr(x,y);
  l=(-N+1):(N-1); % rango de valores de l
  ro=r/sqrt(Ex*Ey); %Normalizar la correlación
 
@@ -429,5 +443,11 @@ end
 
 [M,I] = max(palabrasrmax);
 
-datosActuales = cellstr(get(handles.signal1Mnu, 'String'));
-set(handles.palabraELbl,'String',datosActuales(I));
+set(handles.palabraELbl,'String',);
+
+
+
+
+
+
+
