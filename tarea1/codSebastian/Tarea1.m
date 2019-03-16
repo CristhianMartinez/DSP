@@ -59,6 +59,8 @@ handles.output = hObject;
 axes(handles.axes15);
 imshow('logo.png');
 
+%comentario
+
 %Desplegar dispositivos de grabación 
 global dispDim;
 info = audiodevinfo;
