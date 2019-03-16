@@ -22,7 +22,7 @@ function varargout = Punto2(varargin)
 
 % Edit the above text to modify the response to help Punto2
 
-% Last Modified by GUIDE v2.5 12-Mar-2019 21:07:55
+% Last Modified by GUIDE v2.5 16-Mar-2019 10:14:44
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -81,15 +81,22 @@ function grabarBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to grabarBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global Fs1
+global Fs
 global CH1
 global recorder1
 
 nBits = 8;
 CH1 = 1;
-Fs1 = 44100;
+Fs = 8000;
 
-recorder1 = audiorecorder(Fs1,nBits,1);
+nuevaPalabra = get(handles.palabraTxt,'String');
+
+if isempty(nuevaPalabra)
+    return;
+end
+
+set(handles.pararBtn,'enable','on');
+recorder1 = audiorecorder(Fs,nBits,1);
 record(recorder1);
 
 % --- Executes on button press in pararBtn.
@@ -98,13 +105,13 @@ function pararBtn_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 global recorder1
+global Fs
 global diccionarioReducidoP1
 global diccionarioReducidoP2
 
+set(handles.pararBtn,'enable','off');
 stop(recorder1);
 y1 = getaudiodata(recorder1)';
-
-
 
 nuevaPalabra = get(handles.palabraTxt,'String');
 
@@ -120,6 +127,13 @@ switch Persona
         datosActuales{end+1} = nuevaPalabra;
         set(handles.signal1Mnu,'string',datosActuales);
         set(handles.signal1Mnu, 'Value', length(datosActuales))
+        
+        items = get(handles.signal1Mnu,'String')
+        palabra = items{length(datosActuales)}
+        axes(handles.axes1)  
+        %t=0:1/Fs:(length(diccionarioReducidoP1(palabra))-1)/Fs;
+        plot(diccionarioReducidoP1(palabra));
+   
     case 2
         diccionarioReducidoP2(nuevaPalabra) = y1;
         
@@ -127,6 +141,12 @@ switch Persona
         datosActuales{end+1} = nuevaPalabra;
         set(handles.signal2Mnu,'string',datosActuales);
         set(handles.signal2Mnu, 'Value', length(datosActuales))
+        
+        items = get(handles.signal2Mnu,'String')
+        palabra = items{length(datosActuales)}
+        axes(handles.axes2)  
+        %t=0:1/Fs:(length(diccionarioReducidoP2(palabra))-1)/Fs;
+        plot(diccionarioReducidoP2(palabra));
 end
 
 
@@ -187,17 +207,17 @@ idx1 = get(handles.signal1Mnu,'Value');
 items1 = get(handles.signal1Mnu,'String')
 palabra1 = items1{idx1}
 
-% if palabra1 == ''
-%     return
-% end
+if isempty(palabra1)
+    return
+end
 
 idx2 = get(handles.signal2Mnu,'Value');
 items2 = get(handles.signal2Mnu,'String')
 palabra2 = items2{idx2}
 
-% if palabra2 == ''
-%     return
-% end
+if isempty(palabra1)
+    return
+end
 
 % Señales a correlacionar
 x=diccionarioReducidoP1(palabra1); 
@@ -205,6 +225,7 @@ nx=0:length(x)-1;
 Ex=sum(x.^2); %Energía de x(n)=rxx(0)
  
 y=diccionarioReducidoP2(palabra2);
+%y=diccionarioReducidoP1(palabra1);
 ny=0:length(y)-1;
 Ey=sum(y.^2); %Energía de y(n)=ryy(0)
 
@@ -220,23 +241,27 @@ axes(handles.axes3)
 stem(l,ro);title(['ro(l), lmax= ' num2str(lmax-N)]); 
 xlabel('l');grid on;
 
+rmax
+
+set(handles.amplitudLbl,'String',sprintf('%s = %.3f','rmax',rmax));
+
 % --- Executes on button press in reproducirBtn1.
 function reproducirBtn1_Callback(hObject, eventdata, handles)
 % hObject    handle to reproducirBtn1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global Fs1
+global Fs
 global diccionarioReducidoP1
 
 idx = get(handles.signal1Mnu,'Value');
 items = get(handles.signal1Mnu,'String')
 palabra = items{idx}
 
-% if palabra == ''
-%     return
-% end
+if isempty(palabra)
+    return
+end
 
-sound(diccionarioReducidoP1(palabra),Fs1);
+sound(diccionarioReducidoP1(palabra),Fs);
 
 
 % --- Executes on button press in reproducirBtn2.
@@ -244,18 +269,19 @@ function reproducirBtn2_Callback(hObject, eventdata, handles)
 % hObject    handle to reproducirBtn2 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global Fs1
+global Fs
 global diccionarioReducidoP2
 
 idx = get(handles.signal2Mnu,'Value');
 items = get(handles.signal2Mnu,'String')
 palabra = items{idx}
 
-% if palabra == ''
-%     return
-% end
+if isempty(palabra)
+    return
+end
 
-sound(diccionarioReducidoP2(palabra),Fs1);
+
+sound(diccionarioReducidoP2(palabra),Fs);
 
 
 % --- Executes on selection change in signal1Mnu.
@@ -267,13 +293,16 @@ function signal1Mnu_Callback(hObject, eventdata, handles)
 % Hints: contents = cellstr(get(hObject,'String')) returns signal1Mnu contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from signal1Mnu
 global diccionarioReducidoP1
+global Fs
+
 contents = cellstr(get(hObject,'String'))
 axes(handles.axes1)  
 palabra = contents{get(hObject,'Value')};
-% if palabra == ''
-%     return
-% end
-plot(diccionarioReducidoP1(palabra))
+if isempty(palabra)
+    return
+end
+%t=0:1/Fs:(length(diccionarioReducidoP1(palabra))-1)/Fs;
+plot(diccionarioReducidoP1(palabra));
 
 
 % --- Executes during object creation, after setting all properties.
@@ -298,13 +327,16 @@ function signal2Mnu_Callback(hObject, eventdata, handles)
 % Hints: contents = cellstr(get(hObject,'String')) returns signal2Mnu contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from signal2Mnu
 global diccionarioReducidoP2
+global Fs
+
 contents = cellstr(get(hObject,'String'))
 axes(handles.axes2)  
 palabra = contents{get(hObject,'Value')};
-% if palabra == ''
-%     return
-% end
-plot(diccionarioReducidoP2(palabra))
+if isempty(palabra)
+    return
+end
+%t=0:1/Fs:(length(diccionarioReducidoP2(palabra))-1)/Fs;
+plot(diccionarioReducidoP2(palabra));
 
 % --- Executes during object creation, after setting all properties.
 function signal2Mnu_CreateFcn(hObject, eventdata, handles)
@@ -319,24 +351,95 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% --- Executes on selection change in frecuenciaMnu.
-function frecuenciaMnu_Callback(hObject, eventdata, handles)
-% hObject    handle to frecuenciaMnu (see GCBO)
+% --- Executes on button press in autocorrelacionBtn.
+function autocorrelacionBtn_Callback(hObject, eventdata, handles)
+% hObject    handle to autocorrelacionBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+global diccionarioReducidoP1
+global diccionarioReducidoP2
 
-% Hints: contents = cellstr(get(hObject,'String')) returns frecuenciaMnu contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from frecuenciaMnu
+idx1 = get(handles.signal1Mnu,'Value');
+items1 = get(handles.signal1Mnu,'String')
+palabra1 = items1{idx1}
 
-
-% --- Executes during object creation, after setting all properties.
-function frecuenciaMnu_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to frecuenciaMnu (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
+if isempty(palabra1)
+    return
 end
+
+idx2 = get(handles.signal2Mnu,'Value');
+items2 = get(handles.signal2Mnu,'String')
+palabra2 = items2{idx2}
+
+if isempty(palabra1)
+    return
+end
+
+% Señales a correlacionar
+x=diccionarioReducidoP1(palabra1); 
+nx=0:length(x)-1;
+Ex=sum(x.^2); %Energía de x(n)=rxx(0)
+ 
+%y=diccionarioReducidoP2(palabra2);
+y=diccionarioReducidoP1(palabra1);
+ny=0:length(y)-1;
+Ey=sum(y.^2); %Energía de y(n)=ryy(0)
+
+% Calcular Correlación
+N=max(length(x),length(y));
+r = xcorr(x,y);
+l=(-N+1):(N-1); % rango de valores de l
+ro=r/sqrt(Ex*Ey); %Normalizar la correlación
+% Graficación
+
+[rmax,lmax]=max(ro);
+axes(handles.axes5) 
+stem(l,ro);title(['ro(l), lmax= ' num2str(lmax-N)]); 
+xlabel('l');grid on;
+
+
+% --- Executes on button press in reconocerBtn.
+function reconocerBtn_Callback(hObject, eventdata, handles)
+% hObject    handle to reconocerBtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global diccionarioReducidoP1
+global diccionarioReducidoP2
+
+idx = get(handles.signal2Mnu,'Value');
+items = get(handles.signal2Mnu,'String')
+palabra = items{idx}
+
+if isempty(palabra)
+    return
+end
+
+% Señales a correlacionar
+x=diccionarioReducidoP2(palabra); 
+nx=0:length(x)-1;
+Ex=sum(x.^2); %Energía de x(n)=rxx(0)
+
+ks = keys(diccionarioReducidoP1) ;
+val = values(D) ;
+for i = 1:length(D)
+ %[ks{i} val{i}]
+ 
+ ny=0:length(val{i})-1;
+ Ey=sum(y.^2); %Energía de y(n)=ryy(0)
+ 
+ % Calcular Correlación
+ N=max(length(x),length(y));
+ r = xcorr(x,y);
+ l=(-N+1):(N-1); % rango de valores de l
+ ro=r/sqrt(Ex*Ey); %Normalizar la correlación
+
+ [rmax,lmax]=max(ro);
+ 
+ 
+end
+
+
+
+
+
+

@@ -21,7 +21,7 @@ for i=1:n
 end
 
 %Se elige la señal de entrada
-X = Xesc;
+X = Xsen;
 
 A1 = [1 -2.0260 2.148000 -1.159 0.279];
 B = [0.02 0.053 0.071 0.053 0.028];
@@ -39,10 +39,10 @@ B = B./A1(1);
 j = M + 1;
 
 for i = N + 1:length(Y)
-aux = fliplr(Y(i - N:i-1));
-aux2 = fliplr(X(j - M:j));
-Y(i) = -sum(aux.*A) + sum(aux2.*B);
-j = j + 1;
+    aux = fliplr(Y(i - N:i-1));
+    aux2 = fliplr(X(j - M:j));
+    Y(i) = -sum(aux.*A) + sum(aux2.*B);
+    j = j + 1;
 end
 
 t =-(n/2+4):(n/2-1); %escalon
