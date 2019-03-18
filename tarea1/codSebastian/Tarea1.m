@@ -59,24 +59,27 @@ handles.output = hObject;
 axes(handles.axes15);
 imshow('logo.png');
 
-%comentario
+%Volumen
+set(handles.NVS1, 'String', num2str(get(handles.VolumenSenal1,'Value')*100));
+set(handles.NVS2, 'String', num2str(get(handles.VolumenSenal2,'Value')*100));
+set(handles.NVS3, 'String', num2str(get(handles.VolumenSenal3,'Value')*100));
+set(handles.NVSP, 'String', num2str(get(handles.VolumenSenalP,'Value')*100));
 
 %Desplegar dispositivos de grabación 
 global dispDim;
 info = audiodevinfo;
 dispDim = length(info.input);
-set(handles.DispositivoSenal1,'string',info.input(dispDim).Name);
-set(handles.DispositivoSenal2,'string',info.input(dispDim).Name);
-set(handles.DispositivoSenal3,'string',info.input(dispDim).Name);
+
+set(handles.VolumenSenal1,'string',info.input(dispDim).Name);
+set(handles.VolumenSenal2,'string',info.input(dispDim).Name);
+set(handles.VolumenSenal3,'string',info.input(dispDim).Name);
+set(handles.VolumenSenalP,'string',info.input(dispDim).Name);
 
 % Update handles structure
 guidata(hObject, handles);
 
 % UIWAIT makes Tarea1 wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
-
-
-
 
 % --- Outputs from this function are returned to the command line.
 function varargout = Tarea1_OutputFcn(hObject, eventdata, handles) 
@@ -87,8 +90,6 @@ function varargout = Tarea1_OutputFcn(hObject, eventdata, handles)
 
 % Get default command line output from handles structure
 varargout{1} = handles.output;
-
-
 
 % --- Executes on button press in ComenzarGrabarSenal1.
 function ComenzarGrabarSenal1_Callback(hObject, eventdata, handles)
@@ -154,8 +155,6 @@ elseif CH1 == 1 && stereo1 == 1
     y1 = vertcat(y1, y1);
 end
 
-
-
 %Graficar audio de entrada
 RecordTime1 = length(y1)/Fs1;
 iteration = Fs1*RecordTime1;
@@ -193,7 +192,7 @@ elseif CH1 == 1 && stereo1 == 1
         plot(y1(1,1:i*trama),'Color','Red','LineWidth',2);
         hold on
         plot(y1(2,1:i*trama),'Color','Blue','LineWidth',2);
-        hold on
+        hold off
         axis([0 iteration -1 1]);
         xlabel('Sample number');
         ylabel('Amplitude');
@@ -558,6 +557,7 @@ elseif CH3 == 2 && stereo3 == 0
         grid on;
         pause(0.05)
     end
+    
 elseif CH3 == 1 && stereo3 == 1
     for i = 1 : iteration/trama
         plot(y3(1,1:i*trama),'Color','c','LineWidth',2);
@@ -803,9 +803,9 @@ Sf = Yt;
 %Graficar
 axes(handles.senal4);
 for i = 1 : iteration/trama
-    plot(Sf(1,1:i*trama),'Color','c','LineWidth',2);
+    plot(Sf(1,1:i*trama),'Color','r','LineWidth',2);
     hold on
-    plot(Sf(2,1:i*trama),'Color','m','LineWidth',2);
+    plot(Sf(2,1:i*trama),'Color','y','LineWidth',2);
     hold off
     axis([0 iteration -1 1]);
     xlabel('Sample number');
@@ -824,8 +824,8 @@ global Fs
 
 Signal1 = get(handles.SumaSenal1,'Value');
 Signal2 = get(handles.SumaSenal2,'Value');
-Signal1Channel = get(handles.EDCanal,'Value');
-Signal2Channel = get(handles.EDCanal,'Value');
+Signal1Channel = get(handles.SumaCanalSenal1,'Value');
+Signal2Channel = get(handles.SumaCanalSenal2,'Value');
 
 global y1
 global Fs1
@@ -861,47 +861,56 @@ end
 switch Signal1Channel
     case 1
         Y1 = vertcat(Y1(1,:),zeros(1,length(Y1(1,:))));
+        disp('Señal 1 CH1');
     case 2
         Y1 = vertcat(zeros(1,length(Y1(1,:))), Y1(2,:));
+        disp('Señal 1 CH2');
 end   
 
 switch Signal2Channel
     case 1
         Y2 = vertcat(Y2(1,:),zeros(1,length(Y2(1,:))));
+        disp('Señal 2 CH1');
     case 2
         Y2 = vertcat(zeros(1,length(Y2(1,:))), Y2(2,:));
+        disp('Señal 2 CH2');
 end  
 
 %Igualar frecuencias
 if FsY1 > FsY2
-    Y2_s1 = interp(Y2(1,:),FsY1);
-    Y2_s2 = interp(Y2(2,:),FsY1);
-    Y1_s1 = decimate(Y1(1,:),FsY2);
-    Y1_s2 = decimate(Y1(2,:),FsY2);
-    Fs = FsY1 * FsY2;
+    originalFs = FsY1;
+    desiredFs = FsY2;
+    [p,q] = rat(desiredFs / originalFs);
+    Y1_s1 = resample(Y1(1,:),p,q);
+    Y1_s2 = resample(Y1(2,:),p,q);
+    Y1_s = vertcat(Y1_s1, Y1_s2);
+    Y2_s = Y2;
+    Fs = FsY2;
 elseif FsY1 < FsY2
-    Y1_s1 = interp(Y1(1,:),FsY2);
-    Y1_s2 = interp(Y1(2,:),FsY2);
-    Y2_s1 = decimate(Y2(1,:),FsY1);
-    Y2_s2 = decimate(Y2(2,:),FsY1);
-    Fs = FsY1 * FsY2;
+    originalFs = FsY2;
+    desiredFs = FsY1;
+    [p,q] = rat(desiredFs / originalFs);
+    Y2_s1 = resample(Y2(1,:),p,q);
+    Y2_s2 = resample(Y2(2,:),p,q);
+    Y2_s = vertcat(Y2_s1, Y2_s2);
+    Y1_s = Y1;
+    Fs = FsY1;
 else
     Y1_s1 = Y1(1,:);
     Y1_s2 = Y1(2,:);
     Y2_s1 = Y2(1,:);
     Y2_s2 = Y2(2,:);
+    Y1_s = vertcat(Y1_s1, Y1_s2);
+    Y2_s = vertcat(Y2_s1, Y2_s2);
     Fs = FsY1;
-end
-
-Y1_s = vertcat(Y1_s1, Y1_s2);
-Y2_s = vertcat(Y2_s1, Y2_s2);
+end 
 
 %Igualar tiempos
 if length(Y1_s(1,:)) > length(Y2_s(1,:))
-   Y2_IGU = horzcat(zeros(2, length(Y1_s(1,:)) - length(Y2_s(1,:))), Y2_s);
+   Y2_IGU = horzcat(Y2_s, zeros(2, length(Y1_s(1,:)) - length(Y2_s(1,:))));
    Yt = Y1_s + Y2_IGU;
 elseif length(Y1_s(1,:)) < length(Y2_s(1,:))
-   Y1_IGU = horzcat(zeros(2, length(Y2_s(1,:)) - length(Y1_s(1,:))), Y1_s);
+   Y1_IGU = horzcat(Y1_s, zeros(2, length(Y2_s(1,:)) - length(Y1_s(1,:))));
    Yt = Y2_s + Y1_IGU;
 else
    Yt = Y2_s + Y1_s;
@@ -972,53 +981,78 @@ switch Signal2
         FsY2 = Fs3;
 end
 
-switch Signal1Channel
-    case 1
-        Y1 = vertcat(Y1(1,:),zeros(1,length(Y1(1,:))));
-    case 2
-        Y1 = vertcat(zeros(1,length(Y1(1,:))), Y1(2,:));
-end   
-
-switch Signal2Channel
-    case 1
-        Y2 = vertcat(Y2(1,:),zeros(1,length(Y2(1,:))));
-    case 2
-        Y2 = vertcat(zeros(1,length(Y2(1,:))), Y2(2,:));
-end  
-
 %Igualar frecuencias
 if FsY1 > FsY2
-    Y2_s1 = interp(Y2(1,:),FsY1);
-    Y2_s2 = interp(Y2(2,:),FsY1);
-    Y1_s1 = decimate(Y1(1,:),FsY2);
-    Y1_s2 = decimate(Y1(2,:),FsY2);
-    Fs = FsY1 * FsY2;
+    originalFs = FsY1;
+    desiredFs = FsY2;
+    [p,q] = rat(desiredFs / originalFs);
+    Y1_s1 = resample(Y1(1,:),p,q);
+    Y1_s2 = resample(Y1(2,:),p,q);
+    Y1_s = vertcat(Y1_s1, Y1_s2);
+    Y2_s = Y2;
+    Fs = FsY2;
 elseif FsY1 < FsY2
-    Y1_s1 = interp(Y1(1,:),FsY2);
-    Y1_s2 = interp(Y1(2,:),FsY2);
-    Y2_s1 = decimate(Y2(1,:),FsY1);
-    Y2_s2 = decimate(Y2(2,:),FsY1);
-    Fs = FsY1 * FsY2;
+    originalFs = FsY2;
+    desiredFs = FsY1;
+    [p,q] = rat(desiredFs / originalFs);
+    Y2_s1 = resample(Y2(1,:),p,q);
+    Y2_s2 = resample(Y2(2,:),p,q);
+    Y2_s = vertcat(Y2_s1, Y2_s2);
+    Y1_s = Y1;
+    Fs = FsY1;
 else
     Y1_s1 = Y1(1,:);
     Y1_s2 = Y1(2,:);
     Y2_s1 = Y2(1,:);
     Y2_s2 = Y2(2,:);
+    Y1_s = vertcat(Y1_s1, Y1_s2);
+    Y2_s = vertcat(Y2_s1, Y2_s2);
     Fs = FsY1;
-end
-
-Y1_s = vertcat(Y1_s1, Y1_s2);
-Y2_s = vertcat(Y2_s1, Y2_s2);
+end 
 
 %Igualar tiempos
 if length(Y1_s(1,:)) > length(Y2_s(1,:))
-   Y2_IGU = horzcat(zeros(2, length(Y1_s(1,:)) - length(Y2_s(1,:))), Y2_s);
-   Yt = Y1_s .* Y2_IGU;
+   Y2_s = horzcat(Y2_s, zeros(2, length(Y1_s(1,:)) - length(Y2_s(1,:))));
 elseif length(Y1_s(1,:)) < length(Y2_s(1,:))
-   Y1_IGU = horzcat(zeros(2, length(Y2_s(1,:)) - length(Y1_s(1,:))), Y1_s);
-   Yt = Y2_s .* Y1_IGU;
+   Y1_s = horzcat(Y1_s, zeros(2, length(Y2_s(1,:)) - length(Y1_s(1,:))));
 else
-   Yt = Y2_s .* Y1_s;
+    disp('dimensión igual');
+end
+
+switch Signal1Channel
+    case 1
+        CHS1 = 1;
+    case 2
+        CHS1 = 2;
+    case 3
+        CHS1 = 3;
+end   
+
+switch Signal2Channel
+    case 1
+        CHS2 = 1;
+    case 2
+        CHS2 = 2;
+    case 3
+        CHS2 = 3;
+end  
+
+if CHS1 ~= 3 && CHS2 ~=3
+    Yt1 = Y1_s(CHS1,:) .* Y2_s(CHS2,:);
+    Yt2 = Y1_s(CHS1,:) .* Y2_s(CHS2,:);
+    Yt = vertcat(Yt1, Yt2);
+elseif CHS1 == 3 && CHS2 ~=3
+    Yt1 = Y1_s(1,:) .* Y2_s(CHS2,:);
+    Yt2 = Y1_s(2,:) .* Y2_s(CHS2,:);
+    Yt = vertcat(Yt1, Yt2);
+elseif CHS1 ~= 3 && CHS2 ==3
+    Yt1 = Y2_s(1,:) .* Y1_s(CHS1,:);
+    Yt2 = Y2_s(2,:) .* Y1_s(CHS1,:);
+    Yt = vertcat(Yt1, Yt2);
+else
+    Yt1 = Y2_s(1,:) .* Y1_s(1,:);
+    Yt2 = Y2_s(2,:) .* Y1_s(2,:);
+    Yt = vertcat(Yt1, Yt2);
 end
 
 [Sf,~] = mapminmax(Yt);
@@ -1041,6 +1075,149 @@ for i = 1 : iteration/trama
     grid on;
     pause(0.05)
 end 
+
+% --- Executes on button press in ModulacionRealizar.
+function ModulacionRealizar_Callback(hObject, eventdata, handles)
+% hObject    handle to ModulacionRealizar (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global Sf
+global Fs
+
+signal = get(handles.ModulacionSenal,'Value');
+ch = get(handles.ModulacionCanal,'Value');
+Fm = str2num(get(handles.ModulacionFrecuencia, 'string'));
+Metodo = get(handles.ModulacionTipo,'Value');
+
+global y1
+global Fs1
+global y2
+global Fs2
+global y3
+global Fs3
+        
+switch signal
+    case 1        
+        Y1 = y1;
+        Fs = Fs1;
+    case 2        
+        Y1 = y2;
+        Fs = Fs2;
+    case 3       
+        Y1 = y3;
+        Fs = Fs3;
+end
+
+switch ch
+    case 1
+        CHS = 1;
+    case 2
+        CHS = 2;
+    case 3
+        CHS = 3;
+end 
+
+if CHS == 1
+    Y = vertcat(Y1(1,:),zeros(1,length(Y1(1,:))));
+elseif CHS == 2
+    Y = vertcat(zeros(1,length(Y1(1,:))), Y1(2,:));
+else
+    Y = Y1;
+end
+
+switch Metodo
+    case 1
+        t = 1:1/(length(Y(1,:))-1):2;
+        c = sin(2*pi*Fm*t);
+        %modulacion
+        Yt1 = Y(1,:) .* c;
+        Yt2 = Y(2,:) .* c;
+        Yt = vertcat(Yt1, Yt2);
+        
+    case 2
+        t = 1:1/(length(Y(1,:))-1):2;
+        c = sawtooth(Fm*t);
+        %modulacion
+        Yt1 = Y(1,:) .* c;
+        Yt2 = Y(2,:) .* c;
+        Yt = vertcat(Yt1, Yt2);
+end
+
+[Sf,~] = mapminmax(Yt);
+
+%Graficar audio de entrada
+RecordTime = length(Yt(1,:))/Fs;
+iteration = Fs*RecordTime;
+trama = Fs/16;
+
+%Graficar
+axes(handles.senal4);
+for i = 1 : iteration/trama
+    plot(Sf(1,1:i*trama),'Color','c','LineWidth',2);
+    hold on
+    plot(Sf(2,1:i*trama),'Color','m','LineWidth',2);
+    hold off
+    axis([0 iteration -1 1]);
+    xlabel('Sample number');
+    ylabel('Amplitude');
+    grid on;
+    pause(0.05)
+end 
+
+
+% --- Executes on button press in RealizarCorrelacion.
+function RealizarCorrelacion_Callback(hObject, eventdata, handles)
+% hObject    handle to RealizarCorrelacion (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+
+
+
+% --- Executes on slider movement.
+function VolumenSenal1_Callback(hObject, eventdata, handles)
+% hObject    handle to VolumenSenal1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+set(handles.NVS1, 'String', num2str(round(get(handles.VolumenSenal1,'Value')*100)));
+
+
+% --- Executes on slider movement.
+function VolumenSenal2_Callback(hObject, eventdata, handles)
+% hObject    handle to VolumenSenal2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+set(handles.NVS2, 'String', num2str(round(get(handles.VolumenSenal2,'Value')*100)));
+
+% --- Executes on slider movement.
+function VolumenSenal3_Callback(hObject, eventdata, handles)
+% hObject    handle to VolumenSenal3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+set(handles.NVS3, 'String', num2str(round(get(handles.VolumenSenal3,'Value')*100)));
+
+% --- Executes on slider movement.
+function VolumenSenalP_Callback(hObject, eventdata, handles)
+% hObject    handle to VolumenSenalP (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+set(handles.NVSP, 'String', num2str(round(get(handles.VolumenSenalP,'Value')*100)));
+
+
+
 
 function radiobutton3_Callback(hObject, eventdata, handles)
 % hObject    handle to radiobutton3 (see GCBO)
@@ -1708,14 +1885,7 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% --- Executes on slider movement.
-function VolumenSenal1_Callback(hObject, eventdata, handles)
-% hObject    handle to VolumenSenal1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'Value') returns position of slider
-%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
 
 
 % --- Executes during object creation, after setting all properties.
@@ -1812,14 +1982,7 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% --- Executes on slider movement.
-function VolumenSenal3_Callback(hObject, eventdata, handles)
-% hObject    handle to VolumenSenal3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'Value') returns position of slider
-%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
 
 
 % --- Executes during object creation, after setting all properties.
@@ -1898,14 +2061,7 @@ function radiobutton12_Callback(hObject, eventdata, handles)
 % Hint: get(hObject,'Value') returns toggle state of radiobutton12
 
 
-% --- Executes on slider movement.
-function VolumenSenal2_Callback(hObject, eventdata, handles)
-% hObject    handle to VolumenSenal2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'Value') returns position of slider
-%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
 
 
 % --- Executes during object creation, after setting all properties.
@@ -2000,14 +2156,7 @@ function radiobutton14_Callback(hObject, eventdata, handles)
 % Hint: get(hObject,'Value') returns toggle state of radiobutton14
 
 
-% --- Executes on slider movement.
-function VolumenSenalP_Callback(hObject, eventdata, handles)
-% hObject    handle to VolumenSenalP (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'Value') returns position of slider
-%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
 
 
 % --- Executes during object creation, after setting all properties.
@@ -2441,13 +2590,6 @@ function radiobutton23_Callback(hObject, eventdata, handles)
 % Hint: get(hObject,'Value') returns toggle state of radiobutton23
 
 
-% --- Executes on button press in ModulacionRealizar.
-function ModulacionRealizar_Callback(hObject, eventdata, handles)
-% hObject    handle to ModulacionRealizar (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
 % --- Executes on button press in InvertirSenalP.
 function InvertirSenalP_Callback(hObject, eventdata, handles)
 % hObject    handle to InvertirSenalP (see GCBO)
@@ -2578,15 +2720,6 @@ function CanalCorrelacion_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
-
-% --- Executes on button press in RealizarCorrelacion.
-function RealizarCorrelacion_Callback(hObject, eventdata, handles)
-% hObject    handle to RealizarCorrelacion (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
 
 function CA_Callback(hObject, eventdata, handles)
 % hObject    handle to CA (see GCBO)
