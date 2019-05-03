@@ -1,78 +1,48 @@
 clc; clear all; close all;
 
-fc = 1;
-fs = 1000;
+Fs1 = 1000;
+t1 = 0:1/Fs1:100;
+x1 = sin(2*pi*1000*t1);
+x2 = sin(2*pi*1500*t1);
+x3 = sin(2*pi*2000*t1);
+x_ch1 = 0.3*x1+0.2*x2+0.3*x3;
+x_ch2 = 0.1*x1+0.3*x2+0.4*x3;
+x = vertcat(x_ch1, x_ch1);
 
-[b,a] = butter(6,fc/(fs/2));
-figure,
-freqz(b,a)
+fft_Signal1 = fft(x(1,:));
+z1 = fftshift(fft_Signal1);
+fft_mag1 = abs(z1);
+fft_phase1 = angle(z1);
 
-t = 0:1/1e3:2;
-y = chirp(t,0,1,250);
+fft_Signal2 = fft(x(2,:));
+z2 = fftshift(fft_Signal2);
+fft_mag2 = abs(z2);
+fft_phase2 = angle(z2);
 
-dataIn = vertcat (y,y);
+N = length(x);
+%Fbins = ((0:1/N: 1-1/N)*Fs1).';
+ly = length(x);
+Fbins =(-ly/2:ly/2-1)/ly*Fs1;
 
 
-dataOut = filter(b,a,dataIn);
 
-
-N = length(dataIn);
-datafft=fft(dataIn);
-datafft_abs1=abs(datafft(1,:)/N);
-datafft_abs1=datafft_abs1(1:N/2+1);
-datafft_abs2=abs(datafft(2,:)/N);
-datafft_abs2=datafft_abs2(1:N/2+1);
-datafft_abs = vertcat(datafft_abs1, datafft_abs2);
-f=fs*(0:N/2)/N;
-
-figure;
-plot(f,datafft_abs(1,:), 'r')
+subplot(1,3,1);
+plot(t1, x(1,:), 'r');
 hold on
-plot(f,datafft_abs(2,:), 'b')
+plot(t1, x(2,:), 'b');
 hold off
-grid on;
-xlabel('Frequency [Hz]')
-ylabel('Amplitude')
-title('FFT SIGNAL 2 - Mag');
+title('Signal');
+subplot(1,3,2);
+plot(Fbins, fft_mag1, 'r');
+hold on
+plot(Fbins, fft_mag2, 'b');
+hold off
+title('FFT - Mag');
+subplot(1,3,3);
+plot(Fbins, fft_phase1, 'r');
+hold on
+plot(Fbins, fft_phase2, 'b');
+hold off
+title('FFT - Mag');
 
-
-% L=50;
-% n=0:L-1;
-% 
-% x1=ones(1,L);
-% x2=(-1).^n;
-% %Parametros se?ales sinusoidales
-% f=20;
-% fs=15*20;
-% x3=cos(2*pi*f*n/fs);
-% x4=sin(2*pi*f*n/fs);
-% 
-% % Fourier
-% Lw=4*L;
-% dw=2*pi/Lw;
-% w=0:dw:2*pi-dw; %valores eje w
-% 
-% X1f=fft(x1,Lw); MX1=abs(X1f);
-% X2f=fft(x2,Lw); MX2=abs(X2f);
-% X3f=fft(x3,Lw); MX3=abs(X3f);
-% X4f=fft(x4,Lw); MX4=abs(X4f);
-% 
-% subplot(2,2,1);
-% stem(n,x1);title('x1(n)'); grid on;
-% subplot(2,2,2);
-% stem(n,x2);title('x2(n)'); grid on;
-% subplot(2,2,3);
-% plot(w,MX1);title('Mag X1(w)'); xlabel('w'); grid on;
-% subplot(2,2,4);
-% plot(w,MX2);title('Mag X2(w)');xlabel('w'); grid on;
-% 
-% figure
-% 
-% subplot(2,2,1);
-% stem(n,x3);title('x3(n)'); grid on;
-% subplot(2,2,2);
-% stem(n,x4);title('x4(n)'); grid on;
-% subplot(2,2,3);
-% plot(w,MX3);title('Mag X3(w)'); xlabel('w');grid on;
-% subplot(2,2,4);
-% plot(w,MX4);title('Mag X4(w)'); xlabel('w');grid on;
+audiowrite('pruebaSenos.wav',x',Fs1)

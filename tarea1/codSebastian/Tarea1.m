@@ -2887,25 +2887,42 @@ function SWsignal1_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 global y1;
 global Fs1;
-
+tol = 1e-2;
 N = length(y1);
-datafft=fft(y1);
-datafft_abs1=abs(datafft(1,:)/N);
-datafft_abs1=datafft_abs1(1:N/2+1);
-datafft_abs2=abs(datafft(2,:)/N);
-datafft_abs2=datafft_abs2(1:N/2+1);
-datafft_abs = vertcat(datafft_abs1, datafft_abs2);
-f=Fs1*(0:N/2)/N;
+
+datafft1=fft(y1(1,:));
+datafft1_shifted = fftshift(datafft1);
+datafft1_shifted_mag = abs(datafft1_shifted);
+datafft1_shifted(abs(datafft1_shifted) < tol) = 0;
+datafft1_shifted_angle = angle(datafft1_shifted);
+
+datafft2=fft(y1(2,:));
+datafft2_shifted = fftshift(datafft2);
+datafft2_shifted_mag = abs(datafft2_shifted);
+datafft2_shifted(abs(datafft2_shifted) < tol) = 0;
+datafft2_shifted_angle = angle(datafft2_shifted);
+
+f =(-N/2:N/2-1)/N*Fs1;
 
 figure;
-plot(f,datafft_abs(1,:), 'r')
+subplot(1,2,1);
+plot(f,datafft1_shifted_mag, 'r')
 hold on
-plot(f,datafft_abs(2,:), 'b')
+plot(f,datafft2_shifted_mag, 'b')
 hold off
 grid on;
 xlabel('Frequency [Hz]')
 ylabel('Amplitude')
 title('FFT SIGNAL 1 - Mag');
+subplot(1,2,2);
+plot(f,datafft1_shifted_angle, 'r')
+hold on
+plot(f,datafft2_shifted_angle, 'b')
+hold off
+grid on;
+xlabel('Frequency [Hz]')
+ylabel('Angle (rads)')
+title('FFT SIGNAL 1 - Angle');
 
 % --- Executes on button press in SWSignal3.
 function SWSignal3_Callback(hObject, eventdata, handles)
@@ -2914,31 +2931,42 @@ function SWSignal3_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 global y3;
 global Fs3;
-
+tol = 1e-2;
 N = length(y3);
-datafft=fft(y3);
-datafft_abs1=abs(datafft(1,:)/N);
-datafft_abs1=datafft_abs1(1:N/2+1);
-datafft_abs2=abs(datafft(2,:)/N);
-datafft_abs2=datafft_abs2(1:N/2+1);
-datafft_abs = vertcat(datafft_abs1, datafft_abs2);
-f=Fs3*(0:N/2)/N;
+
+datafft1=fft(y3(1,:));
+datafft1_shifted = fftshift(datafft1);
+datafft1_shifted_mag = abs(datafft1_shifted);
+datafft1_shifted(abs(datafft1_shifted) < tol) = 0;
+datafft1_shifted_angle = angle(datafft1_shifted);
+
+datafft2=fft(y3(2,:));
+datafft2_shifted = fftshift(datafft2);
+datafft2_shifted_mag = abs(datafft2_shifted);
+datafft2_shifted(abs(datafft2_shifted) < tol) = 0;
+datafft2_shifted_angle = angle(datafft2_shifted);
+
+f =(-N/2:N/2-1)/N*Fs3;
 
 figure;
-plot(f,datafft_abs(1,:), 'c')
+subplot(1,2,1);
+plot(f,datafft1_shifted_mag, 'c')
 hold on
-plot(f,datafft_abs(2,:), 'm')
+plot(f,datafft2_shifted_mag, 'm')
 hold off
 grid on;
 xlabel('Frequency [Hz]')
 ylabel('Amplitude')
 title('FFT SIGNAL 3 - Mag');
-% subplot(1,2,2);
-% plot(f,phs/pi)
-% grid on;
-% xlabel('Frequency [Hz]')
-% ylabel('Phase / \pi')
-% title('FFT SIGNAL 3- Angle');
+subplot(1,2,2);
+plot(f,datafft1_shifted_angle, 'c')
+hold on
+plot(f,datafft2_shifted_angle, 'm')
+hold off
+grid on;
+xlabel('Frequency [Hz]')
+ylabel('Angle (rads)')
+title('FFT SIGNAL 3 - Angle');
 
 % --- Executes on button press in SWSignal4.
 function SWSignal4_Callback(hObject, eventdata, handles)
@@ -2948,24 +2976,42 @@ function SWSignal4_Callback(hObject, eventdata, handles)
 global Sf;
 global Fs;
 
+tol = 1e-2;
 N = length(Sf);
-datafft=fft(Sf);
-datafft_abs1=abs(datafft(1,:)/N);
-datafft_abs1=datafft_abs1(1:N/2+1);
-datafft_abs2=abs(datafft(2,:)/N);
-datafft_abs2=datafft_abs2(1:N/2+1);
-datafft_abs = vertcat(datafft_abs1, datafft_abs2);
-f=Fs*(0:N/2)/N;
+
+datafft1=fft(Sf(1,:));
+datafft1_shifted = fftshift(datafft1);
+datafft1_shifted_mag = abs(datafft1_shifted);
+datafft1_shifted(abs(datafft1_shifted) < tol) = 0;
+datafft1_shifted_angle = angle(datafft1_shifted);
+
+datafft2=fft(Sf(2,:));
+datafft2_shifted = fftshift(datafft2);
+datafft2_shifted_mag = abs(datafft2_shifted);
+datafft2_shifted(abs(datafft2_shifted) < tol) = 0;
+datafft2_shifted_angle = angle(datafft2_shifted);
+
+f =(-N/2:N/2-1)/N*Fs;
 
 figure;
-plot(f,datafft_abs(1,:), 'r')
+subplot(1,2,1);
+plot(f,datafft1_shifted_mag, 'r')
 hold on
-plot(f,datafft_abs(2,:), 'y')
+plot(f,datafft2_shifted_mag, 'y')
 hold off
 grid on;
 xlabel('Frequency [Hz]')
 ylabel('Amplitude')
 title('FFT SIGNAL 4 - Mag');
+subplot(1,2,2);
+plot(f,datafft1_shifted_angle, 'r')
+hold on
+plot(f,datafft2_shifted_angle, 'y')
+hold off
+grid on;
+xlabel('Frequency [Hz]')
+ylabel('Angle (rads)')
+title('FFT SIGNAL 4 - Angle');
 
 % --- Executes on button press in SWSignal2.
 function SWSignal2_Callback(hObject, eventdata, handles)
@@ -2975,24 +3021,42 @@ function SWSignal2_Callback(hObject, eventdata, handles)
 global y2;
 global Fs2;
 
+tol = 1e-2;
 N = length(y2);
-datafft=fft(y2);
-datafft_abs1=abs(datafft(1,:)/N);
-datafft_abs1=datafft_abs1(1:N/2+1);
-datafft_abs2=abs(datafft(2,:)/N);
-datafft_abs2=datafft_abs2(1:N/2+1);
-datafft_abs = vertcat(datafft_abs1, datafft_abs2);
-f=Fs2*(0:N/2)/N;
+
+datafft1=fft(y2(1,:));
+datafft1_shifted = fftshift(datafft1);
+datafft1_shifted_mag = abs(datafft1_shifted);
+datafft1_shifted(abs(datafft1_shifted) < tol) = 0;
+datafft1_shifted_angle = angle(datafft1_shifted);
+
+datafft2=fft(y2(2,:));
+datafft2_shifted = fftshift(datafft2);
+datafft2_shifted_mag = abs(datafft2_shifted);
+datafft2_shifted(abs(datafft2_shifted) < tol) = 0;
+datafft2_shifted_angle = angle(datafft2_shifted);
+
+f =(-N/2:N/2-1)/N*Fs2;
 
 figure;
-plot(f,datafft_abs(1,:), 'g')
+subplot(1,2,1);
+plot(f,datafft1_shifted_mag, 'g')
 hold on
-plot(f,datafft_abs(2,:), 'y')
+plot(f,datafft2_shifted_mag, 'y')
 hold off
 grid on;
 xlabel('Frequency [Hz]')
 ylabel('Amplitude')
 title('FFT SIGNAL 2 - Mag');
+subplot(1,2,2);
+plot(f,datafft1_shifted_angle, 'g')
+hold on
+plot(f,datafft2_shifted_angle, 'y')
+hold off
+grid on;
+xlabel('Frequency [Hz]')
+ylabel('Angle (rads)')
+title('FFT SIGNAL 2 - Angle');
 
 % --- Executes on button press in LPFilter.
 function LPFilter_Callback(hObject, eventdata, handles)
