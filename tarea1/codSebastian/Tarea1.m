@@ -6,7 +6,7 @@ function varargout = Tarea1(varargin)
 %      H = TAREA1 returns the handle to a new TAREA1 or the handle to
 %      the existing singleton*.
 %
-%      TAREA1('CALLBACK',hObject,eventData,handles,...) calls the local
+%      TAREA1('CALLBACK',hObject,eventData,handles,...) c87¿'09876lls the local
 %      function named CALLBACK in TAREA1.M with the given input arguments.
 %
 %      TAREA1('Property','Value',...) creates a new TAREA1 or raises the
@@ -15,14 +15,14 @@ function varargout = Tarea1(varargin)
 %      unrecognized property name or invalid value makes property application
 %      stop.  All inputs are passed to Tarea1_OpeningFcn via varargin.
 %
-%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
+%      *See GUI Options o|||||||||||||||||||||||||||||||||n GUIDE's Tools menu.  Choose "GUI allows only one
 %      instance to run (singleton)".
-%
+%*/6*-
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
 % Edit the above text to modify the response to help Tarea1
 
-% Last Modified by GUIDE v2.5 13-Mar-2019 01:28:49
+% Last Modified by GUIDE v2.5 28-Apr-2019 23:40:28
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -55,7 +55,7 @@ function Tarea1_OpeningFcn(hObject, eventdata, handles, varargin)
 % Choose default command line output for Tarea1
 handles.output = hObject;
 
-%Logo Univalle
+%Logo
 axes(handles.axes15);
 imshow('logo.png');
 
@@ -74,7 +74,6 @@ set(handles.VolumenSenal1,'string',info.input(dispDim).Name);
 set(handles.VolumenSenal2,'string',info.input(dispDim).Name);
 set(handles.VolumenSenal3,'string',info.input(dispDim).Name);
 set(handles.VolumenSenalP,'string',info.input(dispDim).Name);
-
 % Update handles structure
 guidata(hObject, handles);
 
@@ -254,21 +253,30 @@ global Fs1;
 
 file = uigetfile('*.mp3');
 
-
 [yIn,Fs1] = audioread(file);
 y1 = yIn';
+
+[f,~] = size(y1);
+
+if f == 1
+    y1 = vertcat(y1,y1);
+end
+
+tround = floor(length(y1)/Fs1);
+numSamplesCut = tround*Fs1;
+y1 = y1(:,1:numSamplesCut);
 
 %Graficar audio de entrada
 RecordTime1 = length(y1)/Fs1;
 iteration = Fs1*RecordTime1;
-trama = Fs1/16;
+trama = length(y1)/15;
 
 %Graficar
 axes(handles.senal1);
-for i = 1 : iteration/trama
-    plot(y1(1,1:i*trama),'Color','Red','LineWidth',2);
+for i = 1 : 15
+    plot(y1(1,1:round(i*trama)),'Color','Red','LineWidth',2);
     hold on
-    plot(y1(2,1:i*trama),'Color','Blue','LineWidth',2);
+    plot(y1(2,1:round(i*trama)),'Color','Blue','LineWidth',2);
     hold on
     axis([0 iteration -1 1]);
     xlabel('Sample number');
@@ -276,7 +284,7 @@ for i = 1 : iteration/trama
     grid on;
     pause(0.05)
 end   
-
+hold off
 % --- Executes on button press in ComenzarGrabarSenal2.
 function ComenzarGrabarSenal2_Callback(hObject, eventdata, handles)
 % hObject    handle to ComenzarGrabarSenal2 (see GCBO)
@@ -441,17 +449,27 @@ file = uigetfile('*.mp3');
 [yIn,Fs2] = audioread(file);
 y2 = yIn';
 
+[f,~] = size(y2);
+
+if f == 1
+    y2 = vertcat(y2,y2);
+end
+
+tround = floor(length(y2)/Fs2);
+numSamplesCut = tround*Fs2;
+y2 = y2(:,1:numSamplesCut);
+
 %Graficar audio de entrada
-RecordTime2 = length(y2)/Fs2;
-iteration = Fs2*RecordTime2;
-trama = Fs2/16;
+RecordTime1 = length(y2)/Fs2;
+iteration = Fs2*RecordTime1;
+trama = length(y2)/15;
 
 %Graficar
 axes(handles.senal2);
-for i = 1 : iteration/trama
-    plot(y2(1,1:i*trama),'Color','Green','LineWidth',2);
+for i = 1 : 15
+    plot(y2(1,1:round(i*trama)),'Color','Green','LineWidth',2);
     hold on
-    plot(y2(2,1:i*trama),'Color','Yellow','LineWidth',2);
+    plot(y2(2,1:round(i*trama)),'Color','Yellow','LineWidth',2);
     hold on
     axis([0 iteration -1 1]);
     xlabel('Sample number');
@@ -627,17 +645,27 @@ file = uigetfile('*.mp3');
 [yIn,Fs3] = audioread(file);
 y3 = yIn';
 
+[f,~] = size(y3);
+
+if f == 1
+    y3 = vertcat(y3,y3);
+end
+
+tround = floor(length(y3)/Fs3);
+numSamplesCut = tround*Fs3;
+y3 = y3(:,1:numSamplesCut);
+
 %Graficar audio de entrada
-RecordTime3 = length(y3)/Fs3;
-iteration = Fs3*RecordTime3;
-trama = Fs3/16;
+RecordTime1 = length(y3)/Fs3;
+iteration = Fs3*RecordTime1;
+trama = length(y3)/15;
 
 %Graficar
 axes(handles.senal3);
-for i = 1 : iteration/trama
-    plot(y3(1,1:i*trama),'Color','c','LineWidth',2);
+for i = 1 : 15
+    plot(y3(1,1:round(i*trama)),'Color','c','LineWidth',2);
     hold on
-    plot(y3(2,1:i*trama),'Color','m','LineWidth',2);
+    plot(y3(2,1:round(i*trama)),'Color','m','LineWidth',2);
     hold on
     axis([0 iteration -1 1]);
     xlabel('Sample number');
@@ -797,15 +825,15 @@ end
 %Graficar audio de entrada
 RecordTime = length(Yt(1,:))/Fs;
 iteration = Fs*RecordTime;
-trama = Fs/16;
+trama = length(Yt)/15;
 Sf = Yt;
 
 %Graficar
 axes(handles.senal4);
-for i = 1 : iteration/trama
-    plot(Sf(1,1:i*trama),'Color','r','LineWidth',2);
+for i = 1 : 15
+    plot(Sf(1,1:round(i*trama)),'Color','r','LineWidth',2);
     hold on
-    plot(Sf(2,1:i*trama),'Color','y','LineWidth',2);
+    plot(Sf(2,1:round(i*trama)),'Color','y','LineWidth',2);
     hold off
     axis([0 iteration -1 1]);
     xlabel('Sample number');
@@ -921,14 +949,14 @@ end
 %Graficar audio de entrada
 RecordTime = length(Yt(1,:))/Fs;
 iteration = Fs*RecordTime;
-trama = Fs/16;
+trama = length(Sf)/15;
 
 %Graficar
 axes(handles.senal4);
-for i = 1 : iteration/trama
-    plot(Sf(1,1:i*trama),'Color','c','LineWidth',2);
+for i = 1 : 15
+    plot(Sf(1,1:round(i*trama)),'Color','r','LineWidth',2);
     hold on
-    plot(Sf(2,1:i*trama),'Color','m','LineWidth',2);
+    plot(Sf(2,1:round(i*trama)),'Color','y','LineWidth',2);
     hold off
     axis([0 iteration -1 1]);
     xlabel('Sample number');
@@ -1060,14 +1088,14 @@ end
 %Graficar audio de entrada
 RecordTime = length(Yt(1,:))/Fs;
 iteration = Fs*RecordTime;
-trama = Fs/16;
+trama = length(Sf)/15;
 
 %Graficar
 axes(handles.senal4);
-for i = 1 : iteration/trama
-    plot(Sf(1,1:i*trama),'Color','c','LineWidth',2);
+for i = 1 : 15
+    plot(Sf(1,1:round(i*trama)),'Color','r','LineWidth',2);
     hold on
-    plot(Sf(2,1:i*trama),'Color','m','LineWidth',2);
+    plot(Sf(2,1:round(i*trama)),'Color','y','LineWidth',2);
     hold off
     axis([0 iteration -1 1]);
     xlabel('Sample number');
@@ -1148,14 +1176,14 @@ end
 %Graficar audio de entrada
 RecordTime = length(Yt(1,:))/Fs;
 iteration = Fs*RecordTime;
-trama = Fs/16;
+trama = length(Sf)/15;
 
 %Graficar
 axes(handles.senal4);
-for i = 1 : iteration/trama
-    plot(Sf(1,1:i*trama),'Color','c','LineWidth',2);
+for i = 1 : 15
+    plot(Sf(1,1:round(i*trama)),'Color','r','LineWidth',2);
     hold on
-    plot(Sf(2,1:i*trama),'Color','m','LineWidth',2);
+    plot(Sf(2,1:round(i*trama)),'Color','y','LineWidth',2);
     hold off
     axis([0 iteration -1 1]);
     xlabel('Sample number');
@@ -1170,9 +1198,6 @@ function RealizarCorrelacion_Callback(hObject, eventdata, handles)
 % hObject    handle to RealizarCorrelacion (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-
-
 
 
 % --- Executes on slider movement.
@@ -1215,9 +1240,6 @@ function VolumenSenalP_Callback(hObject, eventdata, handles)
 % Hints: get(hObject,'Value') returns position of slider
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
 set(handles.NVSP, 'String', num2str(round(get(handles.VolumenSenalP,'Value')*100)));
-
-
-
 
 function radiobutton3_Callback(hObject, eventdata, handles)
 % hObject    handle to radiobutton3 (see GCBO)
@@ -2856,3 +2878,743 @@ function MultiplicarCanalSenal2_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in SWsignal1.
+function SWsignal1_Callback(hObject, eventdata, handles)
+% hObject    handle to SWsignal1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global y1;
+global Fs1;
+
+N = length(y1);
+datafft=fft(y1);
+datafft_abs1=abs(datafft(1,:)/N);
+datafft_abs1=datafft_abs1(1:N/2+1);
+datafft_abs2=abs(datafft(2,:)/N);
+datafft_abs2=datafft_abs2(1:N/2+1);
+datafft_abs = vertcat(datafft_abs1, datafft_abs2);
+f=Fs1*(0:N/2)/N;
+
+figure;
+plot(f,datafft_abs(1,:), 'r')
+hold on
+plot(f,datafft_abs(2,:), 'b')
+hold off
+grid on;
+xlabel('Frequency [Hz]')
+ylabel('Amplitude')
+title('FFT SIGNAL 1 - Mag');
+
+% --- Executes on button press in SWSignal3.
+function SWSignal3_Callback(hObject, eventdata, handles)
+% hObject    handle to SWSignal3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global y3;
+global Fs3;
+
+N = length(y3);
+datafft=fft(y3);
+datafft_abs1=abs(datafft(1,:)/N);
+datafft_abs1=datafft_abs1(1:N/2+1);
+datafft_abs2=abs(datafft(2,:)/N);
+datafft_abs2=datafft_abs2(1:N/2+1);
+datafft_abs = vertcat(datafft_abs1, datafft_abs2);
+f=Fs3*(0:N/2)/N;
+
+figure;
+plot(f,datafft_abs(1,:), 'c')
+hold on
+plot(f,datafft_abs(2,:), 'm')
+hold off
+grid on;
+xlabel('Frequency [Hz]')
+ylabel('Amplitude')
+title('FFT SIGNAL 3 - Mag');
+% subplot(1,2,2);
+% plot(f,phs/pi)
+% grid on;
+% xlabel('Frequency [Hz]')
+% ylabel('Phase / \pi')
+% title('FFT SIGNAL 3- Angle');
+
+% --- Executes on button press in SWSignal4.
+function SWSignal4_Callback(hObject, eventdata, handles)
+% hObject    handle to SWSignal4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global Sf;
+global Fs;
+
+N = length(Sf);
+datafft=fft(Sf);
+datafft_abs1=abs(datafft(1,:)/N);
+datafft_abs1=datafft_abs1(1:N/2+1);
+datafft_abs2=abs(datafft(2,:)/N);
+datafft_abs2=datafft_abs2(1:N/2+1);
+datafft_abs = vertcat(datafft_abs1, datafft_abs2);
+f=Fs*(0:N/2)/N;
+
+figure;
+plot(f,datafft_abs(1,:), 'r')
+hold on
+plot(f,datafft_abs(2,:), 'y')
+hold off
+grid on;
+xlabel('Frequency [Hz]')
+ylabel('Amplitude')
+title('FFT SIGNAL 4 - Mag');
+
+% --- Executes on button press in SWSignal2.
+function SWSignal2_Callback(hObject, eventdata, handles)
+% hObject    handle to SWSignal2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global y2;
+global Fs2;
+
+N = length(y2);
+datafft=fft(y2);
+datafft_abs1=abs(datafft(1,:)/N);
+datafft_abs1=datafft_abs1(1:N/2+1);
+datafft_abs2=abs(datafft(2,:)/N);
+datafft_abs2=datafft_abs2(1:N/2+1);
+datafft_abs = vertcat(datafft_abs1, datafft_abs2);
+f=Fs2*(0:N/2)/N;
+
+figure;
+plot(f,datafft_abs(1,:), 'g')
+hold on
+plot(f,datafft_abs(2,:), 'y')
+hold off
+grid on;
+xlabel('Frequency [Hz]')
+ylabel('Amplitude')
+title('FFT SIGNAL 2 - Mag');
+
+% --- Executes on button press in LPFilter.
+function LPFilter_Callback(hObject, eventdata, handles)
+% hObject    handle to LPFilter (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% Hint: get(hObject,'Value') returns toggle state of LPFilter
+if get(handles.LPFilter,'Value') == 1
+    buttons_list = [handles.BPFilter, handles.HPFilter];
+    set(buttons_list, 'Value', 0);
+    set(handles.FCI,'Enable','on')
+    set(handles.FCS,'Enable','off')
+end
+
+% --- Executes on button press in BPFilter.
+function BPFilter_Callback(hObject, eventdata, handles)
+% hObject    handle to BPFilter (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% Hint: get(hObject,'Value') returns toggle state of BPFilter
+if get(handles.BPFilter,'Value') == 1
+    buttons_list = [handles.LPFilter, handles.HPFilter];
+    set(buttons_list, 'Value', 0);
+    set(handles.FCI,'Enable','on')
+    set(handles.FCS,'Enable','on')
+end
+
+% --- Executes on button press in HPFilter.
+function HPFilter_Callback(hObject, eventdata, handles)
+% hObject    handle to HPFilter (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% Hint: get(hObject,'Value') returns toggle state of HPFilter
+if get(handles.HPFilter,'Value') == 1
+    buttons_list = [handles.BPFilter, handles.LPFilter];
+    set(buttons_list, 'Value', 0);
+    set(handles.FCI,'Enable','off')
+    set(handles.FCS,'Enable','on')
+end
+
+% --- Executes on selection change in FilterType.
+function FilterType_Callback(hObject, eventdata, handles)
+% hObject    handle to FilterType (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns FilterType contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from FilterType
+
+
+% --- Executes during object creation, after setting all properties.
+function FilterType_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to FilterType (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in FilterSignal.
+function FilterSignal_Callback(hObject, eventdata, handles)
+% hObject    handle to FilterSignal (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns FilterSignal contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from FilterSignal
+
+
+% --- Executes during object creation, after setting all properties.
+function FilterSignal_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to FilterSignal (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in PFilter.
+function PFilter_Callback(hObject, eventdata, handles)
+% hObject    handle to PFilter (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global Fs;
+global Sf;
+
+FCI = str2num(get(handles.FCI, 'string'));
+FCS = str2num(get(handles.FCS, 'string'));
+FilterSignal = get(handles.FilterSignal, 'Value');
+FilterSignalChannel = get(handles.FilterSignalChannel, 'Value');
+TipoFil = get(handles.FilterType,'Value');
+
+%Cargar variables globales
+switch FilterSignal
+    case 1
+        global y1;
+        global Fs1;
+    case 2
+        global y2;
+        global Fs2;
+    case 3
+        global y3;
+        global Fs3;
+end
+
+%-----------------FILTRO PASO BAJO--------------------------------------
+if get(handles.LPFilter,'Value') == 1 %Tipo LP 
+
+    switch TipoFil %-----------------------TIPO DE FILTRO-------------
+        case 1 %FIR
+            a = 1;  
+            switch FilterSignal %Señal 
+                case 1
+                    Fs = Fs1;
+                    lpFilt = designfilt('lowpassfir','PassbandFrequency',FCI/(Fs1/2), ...
+         'StopbandFrequency',(FCI/(Fs1/2))+0.1,'PassbandRipple',0.5, ...
+         'StopbandAttenuation',65,'DesignMethod','kaiserwin');
+                case 2
+                    Fs = Fs2;
+                    lpFilt = designfilt('lowpassfir','PassbandFrequency',FCI/(Fs2/2), ...
+         'StopbandFrequency',(FCI/(Fs2/2))+0.1,'PassbandRipple',0.5, ...
+         'StopbandAttenuation',65,'DesignMethod','kaiserwin');
+                case 3
+                    Fs = Fs3;
+                    lpFilt = designfilt('lowpassfir','PassbandFrequency',FCI/(Fs3/2), ...
+         'StopbandFrequency',(FCI/(Fs3/2))+0.1  ,'PassbandRipple',0.5, ...
+         'StopbandAttenuation',65,'DesignMethod','kaiserwin');
+            end        
+        case 2 %Butter
+            a = 0;
+            switch FilterSignal %Señal 
+                case 1
+                    Fs = Fs1;
+                    [num,den] = butter(6,FCI/(Fs1/2), 'low'); 
+                case 2
+                    Fs = Fs2;
+                    [num,den] = butter(6,FCI/(Fs2/2), 'low'); 
+                case 3
+                    Fs = Fs3;
+                    [num,den] = butter(6,FCI/(Fs3/2), 'low'); 
+            end            
+        case 3 %Chevy
+            a = 0;
+            switch FilterSignal %Señal 
+                case 1
+                    Fs = Fs1;
+                    [num,den] = cheby2(6,40,FCI/(Fs1/2), 'low');
+                case 2
+                    Fs = Fs2;
+                    [num,den] = cheby2(6,40,FCI/(Fs2/2), 'low');
+                case 3
+                    Fs = Fs3;
+                    [num,den] = cheby2(6,40,FCI/(Fs3/2), 'low');
+            end            
+    end    
+      
+    switch FilterSignal %Señal ----------------APLICACION EN LA SEÑAL-----
+        case 1
+            switch FilterSignalChannel 
+                case 1 %Canal 1
+                    if a == 0
+                        filterSignal1 = filter(num,den,y1(1,:));
+                        Sf = vertcat(filterSignal1, y1(2,:));
+                    else
+                        filterSignal1 = filter(lpFilt,y1(1,:));
+                        Sf = vertcat(filterSignal1, y1(2,:));
+                    end
+                case 2 %Canal 2
+                    if a == 0
+                        filterSignal2 = filter(num,den,y1(2,:));
+                        Sf = vertcat(y1(1,:), filterSignal2);
+                    else
+                        filterSignal2 = filter(lpFilt,y1(2,:));
+                        Sf = vertcat(y1(1,:), filterSignal2);
+                    end
+                case 3 %Ambos canales
+                    if a == 0
+                        filterSignal1 = filter(num,den,y1(1,:));
+                        filterSignal2 = filter(num,den,y1(2,:));
+                        Sf = vertcat(filterSignal1, filterSignal2);
+                    else
+                        filterSignal1 = filter(lpFilt,y1(1,:));
+                        filterSignal2 = filter(lpFilt,y1(2,:));
+                        Sf = vertcat(filterSignal1, filterSignal2);
+                    end
+            end
+        case 2
+            switch FilterSignalChannel 
+                case 1 %Canal 1
+                    if a == 0
+                        filterSignal1 = filter(num,den,y2(1,:));
+                        Sf = vertcat(filterSignal1, y2(2,:));
+                    else
+                        filterSignal1 = filter(lpFilt,y2(1,:));
+                        Sf = vertcat(filterSignal1, y2(2,:));
+                    end
+                case 2 %Canal 2
+                    if a == 0
+                        filterSignal2 = filter(num,den,y2(2,:));
+                        Sf = vertcat(y2(1,:), filterSignal2);
+                    else
+                        filterSignal2 = filter(lpFilt,y2(2,:));
+                        Sf = vertcat(y2(1,:), filterSignal2);
+                    end
+                case 3 %Ambos canales
+                    if a == 0
+                        filterSignal1 = filter(num,den,y2(1,:));
+                        filterSignal2 = filter(num,den,y2(2,:));
+                        Sf = vertcat(filterSignal1, filterSignal2);
+                    else
+                        filterSignal1 = filter(lpFilt,y2(1,:));
+                        filterSignal2 = filter(lpFilt,y2(2,:));
+                        Sf = vertcat(filterSignal1, filterSignal2);
+                    end
+            end
+        case 3
+            switch FilterSignalChannel 
+                case 1 %Canal 1
+                    if a == 0
+                        filterSignal1 = filter(num,den,y3(1,:));
+                        Sf = vertcat(filterSignal1, y3(2,:));
+                    else
+                        filterSignal1 = filter(lpFilt,y3(1,:));
+                        Sf = vertcat(filterSignal1, y3(2,:));
+                    end
+                case 2 %Canal 2
+                    if a == 0
+                        filterSignal2 = filter(num,den,y3(2,:));
+                        Sf = vertcat(y3(1,:), filterSignal2);
+                    else
+                        filterSignal2 = filter(lpFilt,y3(2,:));
+                        Sf = vertcat(y3(1,:), filterSignal2);
+                    end
+                case 3 %Ambos canales
+                    if a == 0
+                        filterSignal1 = filter(num,den,y3(1,:));
+                        filterSignal2 = filter(num,den,y3(2,:));
+                        Sf = vertcat(filterSignal1, filterSignal2);
+                    else
+                        filterSignal1 = filter(lpFilt,y3(1,:));
+                        filterSignal2 = filter(lpFilt,y3(2,:));
+                        Sf = vertcat(filterSignal1, filterSignal2);
+                    end
+            end
+    end
+    
+%-----------------FILTRO BANDA PASO--------------------------------------    
+elseif get(handles.BPFilter,'Value') == 1 %Tipo BP
+    
+    switch TipoFil %-----------------------TIPO DE FILTRO-------------
+        case 1 %FIR
+            a = 1;  
+            switch FilterSignal %Señal 
+                case 1
+                    Fs = Fs1;
+                    bpFilt = designfilt('bandpassfir','FilterOrder',20, ...
+         'CutoffFrequency1',FCI,'CutoffFrequency2',FCS, ...
+         'SampleRate',Fs1);
+                case 2
+                    Fs = Fs2;
+                    bpFilt = designfilt('bandpassfir','FilterOrder',20, ...
+         'CutoffFrequency1',FCI,'CutoffFrequency2',FCS, ...
+         'SampleRate',Fs2);
+                case 3
+                    Fs = Fs3;
+                    bpFilt = designfilt('bandpassfir','FilterOrder',20, ...
+         'CutoffFrequency1',FCI,'CutoffFrequency2',FCS, ...
+         'SampleRate',Fs3);
+            end        
+        case 2 %Butter
+            a = 0;
+            switch FilterSignal %Señal 
+                case 1
+                    Fs = Fs1;
+                    [num,den] = butter(6,[FCI FCS]/(Fs1/2), 'bandpass'); 
+                case 2
+                    Fs = Fs2;
+                    [num,den] = butter(6,[FCI FCS]/(Fs2/2), 'bandpass'); 
+                case 3
+                    Fs = Fs3;
+                    [num,den] = butter(6,[FCI FCS]/(Fs3/2), 'bandpass'); 
+            end            
+        case 3 %Chevy
+            a = 0;
+            switch FilterSignal %Señal 
+                case 1
+                    Fs = Fs1;
+                    [num,den] = cheby2(6,40,[FCI FCS]/(Fs1/2), 'bandpass');
+                case 2
+                    Fs = Fs2;
+                    [num,den] = cheby2(6,40,[FCI FCS]/(Fs2/2), 'bandpass');
+                case 3
+                    Fs = Fs3;
+                    [num,den] = cheby2(6,40,[FCI FCS]/(Fs3/2), 'bandpass');
+            end            
+    end    
+      
+    switch FilterSignal %Señal ----------------APLICACION EN LA SEÑAL-----
+        case 1
+            switch FilterSignalChannel 
+                case 1 %Canal 1
+                    if a == 0
+                        filterSignal1 = filter(num,den,y1(1,:));
+                        Sf = vertcat(filterSignal1, y1(2,:));
+                    else
+                        filterSignal1 = filter(bpFilt,y1(1,:));
+                        Sf = vertcat(filterSignal1, y1(2,:));
+                    end
+                case 2 %Canal 2
+                    if a == 0
+                        filterSignal2 = filter(num,den,y1(2,:));
+                        Sf = vertcat(y1(1,:), filterSignal2);
+                    else
+                        filterSignal2 = filter(bpFilt,y1(2,:));
+                        Sf = vertcat(y1(1,:), filterSignal2);
+                    end
+                case 3 %Ambos canales
+                    if a == 0
+                        filterSignal1 = filter(num,den,y1(1,:));
+                        filterSignal2 = filter(num,den,y1(2,:));
+                        Sf = vertcat(filterSignal1, filterSignal2);
+                    else
+                        filterSignal1 = filter(bpFilt,y1(1,:));
+                        filterSignal2 = filter(bpFilt,y1(2,:));
+                        Sf = vertcat(filterSignal1, filterSignal2);
+                    end
+            end
+        case 2
+            switch FilterSignalChannel 
+                case 1 %Canal 1
+                    if a == 0
+                        filterSignal1 = filter(num,den,y2(1,:));
+                        Sf = vertcat(filterSignal1, y2(2,:));
+                    else
+                        filterSignal1 = filter(bpFilt,y2(1,:));
+                        Sf = vertcat(filterSignal1, y2(2,:));
+                    end
+                case 2 %Canal 2
+                    if a == 0
+                        filterSignal2 = filter(num,den,y2(2,:));
+                        Sf = vertcat(y2(1,:), filterSignal2);
+                    else
+                        filterSignal2 = filter(bpFilt,y2(2,:));
+                        Sf = vertcat(y2(1,:), filterSignal2);
+                    end
+                case 3 %Ambos canales
+                    if a == 0
+                        filterSignal1 = filter(num,den,y2(1,:));
+                        filterSignal2 = filter(num,den,y2(2,:));
+                        Sf = vertcat(filterSignal1, filterSignal2);
+                    else
+                        filterSignal1 = filter(bpFilt,y2(1,:));
+                        filterSignal2 = filter(bpFilt,y2(2,:));
+                        Sf = vertcat(filterSignal1, filterSignal2);
+                    end
+            end
+        case 3
+            switch FilterSignalChannel 
+                case 1 %Canal 1
+                    if a == 0
+                        filterSignal1 = filter(num,den,y3(1,:));
+                        Sf = vertcat(filterSignal1, y3(2,:));
+                    else
+                        filterSignal1 = filter(bpFilt,y3(1,:));
+                        Sf = vertcat(filterSignal1, y3(2,:));
+                    end
+                case 2 %Canal 2
+                    if a == 0
+                        filterSignal2 = filter(num,den,y3(2,:));
+                        Sf = vertcat(y3(1,:), filterSignal2);
+                    else
+                        filterSignal2 = filter(bpFilt,y3(2,:));
+                        Sf = vertcat(y3(1,:), filterSignal2);
+                    end
+                case 3 %Ambos canales
+                    if a == 0
+                        filterSignal1 = filter(num,den,y3(1,:));
+                        filterSignal2 = filter(num,den,y3(2,:));
+                        Sf = vertcat(filterSignal1, filterSignal2);
+                    else
+                        filterSignal1 = filter(bpFilt,y3(1,:));
+                        filterSignal2 = filter(bpFilt,y3(2,:));
+                        Sf = vertcat(filterSignal1, filterSignal2);
+                    end
+            end
+    end                
+
+%-----------------FILTRO PASO ALTO--------------------------------------     
+elseif get(handles.HPFilter,'Value') == 1 %Tipo HP
+
+    switch TipoFil %-----------------------TIPO DE FILTRO-------------
+        case 1 %FIR
+            a = 1;  
+            switch FilterSignal %Señal 
+                case 1
+                    Fs = Fs1;
+                    hpFilt = designfilt('highpassfir','StopbandFrequency',FCS/(Fs1/2), ...
+         'PassbandFrequency',(FCS/(Fs1/2))+0.1,'PassbandRipple',0.5, ...
+         'StopbandAttenuation',65,'DesignMethod','kaiserwin');
+                case 2
+                    Fs = Fs2;
+                    hpFilt = designfilt('highpassfir','StopbandFrequency',FCS/(Fs2/2), ...
+         'PassbandFrequency',(FCS/(Fs2/2))+0.1,'PassbandRipple',0.5, ...
+         'StopbandAttenuation',65,'DesignMethod','kaiserwin');
+                case 3
+                    Fs = Fs3;
+                    hpFilt = designfilt('highpassfir','StopbandFrequency',FCS/(Fs3/2), ...
+         'PassbandFrequency',(FCS/(Fs3/2))+0.1,'PassbandRipple',0.5, ...
+         'StopbandAttenuation',65,'DesignMethod','kaiserwin');
+            end        
+        case 2 %Butter
+            a = 0;
+            switch FilterSignal %Señal 
+                case 1
+                    Fs = Fs1;
+                    [num,den] = butter(6,FCS/(Fs1/2), 'high'); 
+                case 2
+                    Fs = Fs2;
+                    [num,den] = butter(6,FCS/(Fs2/2), 'high'); 
+                case 3
+                    Fs = Fs3;
+                    [num,den] = butter(6,FCS/(Fs3/2), 'high'); 
+            end            
+        case 3 %Chevy
+            a = 0;
+            switch FilterSignal %Señal 
+                case 1
+                    Fs = Fs1;
+                    [num,den] = cheby2(6,40,FCI/(Fs1/2), 'high');
+                case 2
+                    Fs = Fs2;
+                    [num,den] = cheby2(6,40,FCI/(Fs2/2), 'high');
+                case 3
+                    Fs = Fs3;
+                    [num,den] = cheby2(6,40,FCI/(Fs3/2), 'high');
+            end            
+    end    
+      
+    switch FilterSignal %Señal ----------------APLICACION EN LA SEÑAL-----
+        case 1
+            switch FilterSignalChannel 
+                case 1 %Canal 1
+                    if a == 0
+                        filterSignal1 = filter(num,den,y1(1,:));
+                        Sf = vertcat(filterSignal1, y1(2,:));
+                    else
+                        filterSignal1 = filter(hpFilt,y1(1,:));
+                        Sf = vertcat(filterSignal1, y1(2,:));
+                    end
+                case 2 %Canal 2
+                    if a == 0
+                        filterSignal2 = filter(num,den,y1(2,:));
+                        Sf = vertcat(y1(1,:), filterSignal2);
+                    else
+                        filterSignal2 = filter(hpFilt,y1(2,:));
+                        Sf = vertcat(y1(1,:), filterSignal2);
+                    end
+                case 3 %Ambos canales
+                    if a == 0
+                        filterSignal1 = filter(num,den,y1(1,:));
+                        filterSignal2 = filter(num,den,y1(2,:));
+                        Sf = vertcat(filterSignal1, filterSignal2);
+                    else
+                        filterSignal1 = filter(hpFilt,y1(1,:));
+                        filterSignal2 = filter(hpFilt,y1(2,:));
+                        Sf = vertcat(filterSignal1, filterSignal2);
+                    end
+            end
+        case 2
+            switch FilterSignalChannel 
+                case 1 %Canal 1
+                    if a == 0
+                        filterSignal1 = filter(num,den,y2(1,:));
+                        Sf = vertcat(filterSignal1, y2(2,:));
+                    else
+                        filterSignal1 = filter(hpFilt,y2(1,:));
+                        Sf = vertcat(filterSignal1, y2(2,:));
+                    end
+                case 2 %Canal 2
+                    if a == 0
+                        filterSignal2 = filter(num,den,y2(2,:));
+                        Sf = vertcat(y2(1,:), filterSignal2);
+                    else
+                        filterSignal2 = filter(hpFilt,y2(2,:));
+                        Sf = vertcat(y2(1,:), filterSignal2);
+                    end
+                case 3 %Ambos canales
+                    if a == 0
+                        filterSignal1 = filter(num,den,y2(1,:));
+                        filterSignal2 = filter(num,den,y2(2,:));
+                        Sf = vertcat(filterSignal1, filterSignal2);
+                    else
+                        filterSignal1 = filter(hpFilt,y2(1,:));
+                        filterSignal2 = filter(hpFilt,y2(2,:));
+                        Sf = vertcat(filterSignal1, filterSignal2);
+                    end
+            end
+        case 3
+            switch FilterSignalChannel 
+                case 1 %Canal 1
+                    if a == 0
+                        filterSignal1 = filter(num,den,y3(1,:));
+                        Sf = vertcat(filterSignal1, y3(2,:));
+                    else
+                        filterSignal1 = filter(hpFilt,y3(1,:));
+                        Sf = vertcat(filterSignal1, y3(2,:));
+                    end
+                case 2 %Canal 2
+                    if a == 0
+                        filterSignal2 = filter(num,den,y3(2,:));
+                        Sf = vertcat(y3(1,:), filterSignal2);
+                    else
+                        filterSignal2 = filter(hpFilt,y3(2,:));
+                        Sf = vertcat(y3(1,:), filterSignal2);
+                    end
+                case 3 %Ambos canales
+                    if a == 0
+                        filterSignal1 = filter(num,den,y3(1,:));
+                        filterSignal2 = filter(num,den,y3(2,:));
+                        Sf = vertcat(filterSignal1, filterSignal2);
+                    else
+                        filterSignal1 = filter(hpFilt,y3(1,:));
+                        filterSignal2 = filter(hpFilt,y3(2,:));
+                        Sf = vertcat(filterSignal1, filterSignal2);
+                    end
+            end
+    end        
+    
+end
+
+%Graficar audio de entrada
+RecordTime = length(Sf(1,:))/Fs;
+iteration = Fs*RecordTime;
+trama = length(Sf)/15;
+
+%Graficar
+axes(handles.senal4);
+for i = 1 : 15
+    plot(Sf(1,1:round(i*trama)),'Color','r','LineWidth',2);
+    hold on
+    plot(Sf(2,1:round(i*trama)),'Color','y','LineWidth',2);
+    hold off
+    axis([0 iteration -1 1]);
+    xlabel('Sample number');
+    ylabel('Amplitude');
+    grid on;
+    pause(0.05)
+end 
+
+% --- Executes on selection change in FilterSignalChannel.
+function FilterSignalChannel_Callback(hObject, eventdata, handles)
+% hObject    handle to FilterSignalChannel (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% Hints: contents = cellstr(get(hObject,'String')) returns FilterSignalChannel contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from FilterSignalChannel
+
+
+
+
+% --- Executes during object creation, after setting all properties.
+function FilterSignalChannel_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to FilterSignalChannel (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function FCI_Callback(hObject, eventdata, handles)
+% hObject    handle to FCI (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of FCI as text
+%        str2double(get(hObject,'String')) returns contents of FCI as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function FCI_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to FCI (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+function FCS_Callback(hObject, eventdata, handles)
+% hObject    handle to FCS (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of FCS as text
+%        str2double(get(hObject,'String')) returns contents of FCS as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function FCS_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to FCS (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+    
